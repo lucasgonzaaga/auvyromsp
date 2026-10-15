@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addCommentRecord, addTimeRecord, buildTicketActivity, normalizeTicket, updateTicketRecord } from './ticketService.js';
+import { addCommentRecord, addTimeRecord, buildTicketActivity, canTransitionStatus, getAllowedStatuses, normalizeTicket, updateTicketRecord } from './ticketService.js';
 
 function ticket(overrides = {}) {
   return normalizeTicket({
@@ -21,6 +21,18 @@ test('mantém resolução e encerramento em campos separados durante o ciclo de 
   const closed = updateTicketRecord(resolved, { status: 'Encerrado' }, 'Técnico', closedAt);
   assert.equal(closed.resolvedAt, resolvedAt);
   assert.equal(closed.closedAt, closedAt);
+});
+
+test('rejeita encerramento sem resolução e expõe apenas transições permitidas', () => {
+  const fresh = ticket({ status: 'Novo' });
+  assert.equal(canTransitionStatus('Novo', 'Encerrado'), false);
+  assert.deepEqual(getAllowedStatuses('Novo'), ['Novo', 'Em triagem']);
+  assert.throws(() => updateTicketRecord(fresh, { status: 'Encerrado' }, { id: 'tech-1', name: 'Técnico' }), /Transição inválida/);
+});
+
+test('operações exigem a identidade da sessão', () => {
+  assert.throws(() => updateTicketRecord(ticket(), { priority: 'P2' }), /usuário da sessão/);
+  assert.throws(() => addCommentRecord(ticket(), 'Teste'), /usuário da sessão/);
 });
 
 test('reabertura limpa as datas do ciclo atual', () => {

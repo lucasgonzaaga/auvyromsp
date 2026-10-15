@@ -1,3 +1,5 @@
+import { normalizeTimeEntry } from '../utils/timeEntries.js';
+
 const STORAGE_KEY = 'auvyro-msp-tickets-v3';
 const LEGACY_KEYS = ['auvyro-msp-demo-tickets-v2', 'auvyro-msp-demo-tickets-v1'];
 
@@ -12,6 +14,30 @@ const seed = [
 const nowIso = () => new Date().toISOString();
 const uid = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
+export const STATUS_TRANSITIONS = Object.freeze({
+  Novo: ['Em triagem'],
+  'Em triagem': ['Em atendimento', 'Aguardando cliente', 'Aguardando terceiro'],
+  'Em atendimento': ['Aguardando cliente', 'Aguardando terceiro', 'Resolvido'],
+  'Aguardando cliente': ['Em atendimento'],
+  'Aguardando terceiro': ['Em atendimento'],
+  Resolvido: ['Encerrado', 'Em atendimento'],
+  Encerrado: ['Em atendimento'],
+});
+
+export function canTransitionStatus(from, to) {
+  return from === to || (STATUS_TRANSITIONS[from] || []).includes(to);
+}
+
+export function getAllowedStatuses(status) {
+  return [status, ...(STATUS_TRANSITIONS[status] || [])];
+}
+
+function actorName(actor) {
+  const name = typeof actor === 'string' ? actor : actor?.name;
+  if (!name) throw new TypeError('A operação exige um usuário da sessão.');
+  return name;
+}
+
 export function normalizeTicket(ticket) {
   const legacyMinutes = Number(ticket.minutes) || 0;
   return {
@@ -23,7 +49,7 @@ export function normalizeTicket(ticket) {
     archivedReason: ticket.archivedReason || '',
     comments: Array.isArray(ticket.comments) ? ticket.comments : [],
     timeline: Array.isArray(ticket.timeline) && ticket.timeline.length ? ticket.timeline : [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${ticket.requester}`, createdAt: ticket.createdAt }],
-    timeEntries: Array.isArray(ticket.timeEntries) ? ticket.timeEntries : legacyMinutes ? [{ id: uid('time'), description: 'Tempo importado da versão anterior', minutes: legacyMinutes, type: 'Remoto', author: 'Equipe Auvyro', createdAt: ticket.createdAt }] : [],
+    timeEntries: (Array.isArray(ticket.timeEntries) ? ticket.timeEntries : legacyMinutes ? [{ id: uid('time'), description: 'Tempo importado da versão anterior', minutes: legacyMinutes, type: 'Remoto', author: 'Equipe Auvyro', createdAt: ticket.createdAt }] : []).map((entry) => normalizeTimeEntry(entry, ticket)),
   };
 }
 
@@ -50,11 +76,15 @@ export function createTicket(tickets, form) {
   return normalizeTicket({ ...form, id, status: 'Novo', assignee: '', createdAt, resolvedAt: null, closedAt: null, timeline: [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${form.requester}`, createdAt }] });
 }
 
-export function updateTicketRecord(ticket, changes, actor = 'Alex Santos', createdAt = nowIso()) {
+export function updateTicketRecord(ticket, changes, actor, createdAt = nowIso()) {
+  const userName = actorName(actor);
+  if (changes.status && !canTransitionStatus(ticket.status, changes.status)) {
+    throw new RangeError(`Transição inválida: ${ticket.status} → ${changes.status}.`);
+  }
   const events = [];
   if (changes.status && changes.status !== ticket.status) events.push({ id: uid('event'), type: 'status', text: `Status alterado de ${ticket.status} para ${changes.status}`, createdAt });
   if (changes.priority && changes.priority !== ticket.priority) events.push({ id: uid('event'), type: 'priority', text: `Prioridade alterada de ${ticket.priority} para ${changes.priority}`, createdAt });
-  if (changes.assignee !== undefined && changes.assignee !== ticket.assignee) events.push({ id: uid('event'), type: 'assignee', text: changes.assignee ? `${actor} assumiu o chamado` : 'Responsável removido', createdAt });
+  if (changes.assignee !== undefined && changes.assignee !== ticket.assignee) events.push({ id: uid('event'), type: 'assignee', text: changes.assignee ? `${userName} assumiu o chamado` : 'Responsável removido', createdAt });
   let resolvedAt = ticket.resolvedAt || null;
   let closedAt = ticket.closedAt || null;
   if (changes.status && changes.status !== ticket.status) {
@@ -71,19 +101,23 @@ export function updateTicketRecord(ticket, changes, actor = 'Alex Santos', creat
   return { ...ticket, ...changes, resolvedAt, closedAt, timeline: [...ticket.timeline, ...events] };
 }
 
-export function addCommentRecord(ticket, text, author = 'Alex Santos') {
+export function addCommentRecord(ticket, text, actor) {
+  const author = actorName(actor);
   const createdAt = nowIso();
   return { ...ticket, comments: [...ticket.comments, { id: uid('comment'), author, text, createdAt }] };
 }
 
-export function addTimeRecord(ticket, entry, author = 'Alex Santos') {
+export function addTimeRecord(ticket, entry, actor) {
+  const author = actorName(actor);
   const createdAt = nowIso();
-  return { ...ticket, timeEntries: [...ticket.timeEntries, { id: uid('time'), ...entry, minutes: Number(entry.minutes), author, createdAt }] };
+  const timeEntry = normalizeTimeEntry({ id: uid('time'), ...entry, minutes: Number(entry.minutes), author, createdAt }, ticket);
+  return { ...ticket, timeEntries: [...ticket.timeEntries, timeEntry] };
 }
 
-export function archiveTicketRecord(ticket, reason, actor = 'Alex Santos') {
+export function archiveTicketRecord(ticket, reason, actor) {
+  const userName = actorName(actor);
   const createdAt = nowIso();
-  return { ...ticket, archivedAt: createdAt, archivedReason: reason, timeline: [...ticket.timeline, { id: uid('event'), type: 'archived', text: `${actor} arquivou o chamado: ${reason}`, createdAt }] };
+  return { ...ticket, archivedAt: createdAt, archivedReason: reason, timeline: [...ticket.timeline, { id: uid('event'), type: 'archived', text: `${userName} arquivou o chamado: ${reason}`, createdAt }] };
 }
 
 export function buildTicketActivity(ticket) {

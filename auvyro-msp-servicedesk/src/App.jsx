@@ -14,8 +14,10 @@ import {
 } from './services/ticketService.js';
 import { getMetrics } from './utils/ticketMetrics.js';
 import { formatDateTime } from './utils/date.js';
+import { getCurrentUser } from './services/sessionService.js';
 
 export default function App() {
+  const [currentUser] = useState(getCurrentUser);
   const [tickets, setTickets] = useState(loadTickets);
   const [view, setView] = useState('dashboard');
   const [selectedId, setSelectedId] = useState(null);
@@ -48,10 +50,10 @@ export default function App() {
 
   function navigate(nextView) { setView(nextView); setSelectedId(null); if (nextView !== 'tickets') { setSearch(''); setFilter('Todos'); setCompanyFilter(''); } }
   function openTicket(id) { setSelectedId(id); setView('details'); setNotificationsOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  function updateSelected(changes) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? updateTicketRecord(ticket, changes) : ticket)); }
-  function addComment(text) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? addCommentRecord(ticket, text) : ticket)); }
-  function addTime(entry) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? addTimeRecord(ticket, entry) : ticket)); }
-  function archiveSelected(reason) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? archiveTicketRecord(ticket, reason) : ticket)); navigate('tickets'); }
+  function updateSelected(changes) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? updateTicketRecord(ticket, changes, currentUser) : ticket)); }
+  function addComment(text) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? addCommentRecord(ticket, text, currentUser) : ticket)); }
+  function addTime(entry) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? addTimeRecord(ticket, entry, currentUser) : ticket)); }
+  function archiveSelected(reason) { setTickets((current) => current.map((ticket) => ticket.id === selectedId ? archiveTicketRecord(ticket, reason, currentUser) : ticket)); navigate('tickets'); }
   function handleCreate(form) { const ticket = createTicket(tickets, form); setTickets((current) => [ticket, ...current]); setNewTicketOpen(false); setSelectedId(ticket.id); setView('details'); }
   function openQuickSearch() { setView('tickets'); setSelectedId(null); setNotificationsOpen(false); window.setTimeout(() => searchRef.current?.focus(), 0); }
   function selectClient(company) { setCompanyFilter(company); setSearch(''); setFilter('Todos'); setView('tickets'); }
@@ -60,15 +62,15 @@ export default function App() {
   return <div className="shell">
     <Sidebar active={navActive} openTickets={metrics.open} mobileOpen={mobileMenu} onNavigate={navigate} onClose={() => setMobileMenu(false)} />
     <main className="main">
-      <Topbar active={view} notificationCount={recentNotifications.length} notificationsOpen={notificationsOpen} onMenu={() => setMobileMenu(true)} onQuickSearch={openQuickSearch} onNotifications={() => setNotificationsOpen((value) => !value)} />
+      <Topbar active={view} currentUser={currentUser} notificationCount={recentNotifications.length} notificationsOpen={notificationsOpen} onMenu={() => setMobileMenu(true)} onQuickSearch={openQuickSearch} onNotifications={() => setNotificationsOpen((value) => !value)} />
       {notificationsOpen && <aside className="notification-panel"><div><strong>Atividade recente</strong><button onClick={() => setNotificationsOpen(false)}>Fechar</button></div>{recentNotifications.map((item) => <button key={`${item.ticketId}-${item.id}`} onClick={() => openTicket(item.ticketId)}><span>{item.text}</span><small>{item.ticketId} · {formatDateTime(item.createdAt)}</small></button>)}</aside>}
       <div className="content">
         {view === 'dashboard' && <Dashboard tickets={activeTickets} metrics={metrics} onCreate={() => setNewTicketOpen(true)} onOpen={openTicket} onSeeAll={() => navigate('tickets')} />}
         {view === 'tickets' && <Tickets tickets={filtered} search={search} filter={filter} onSearch={setSearch} onFilter={setFilter} onCreate={() => setNewTicketOpen(true)} onOpen={openTicket} searchRef={searchRef} />}
         {view === 'clients' && <Clients tickets={activeTickets} onSelect={selectClient} />}
         {view === 'time' && <TimeEntries tickets={tickets} onOpen={openTicket} />}
-        {(view === 'team' || view === 'settings') && <InfoPage type={view} />}
-        {view === 'details' && selected && <TicketDetails ticket={selected} onBack={() => navigate('tickets')} onSave={updateSelected} onComment={addComment} onTime={addTime} onArchive={archiveSelected} />}
+        {(view === 'team' || view === 'settings') && <InfoPage type={view} currentUser={currentUser} />}
+        {view === 'details' && selected && <TicketDetails ticket={selected} currentUser={currentUser} onBack={() => navigate('tickets')} onSave={updateSelected} onComment={addComment} onTime={addTime} onArchive={archiveSelected} />}
         <footer><span>Auvyro MSP · Central de serviços v0.2</span><span>Dados locais · última atualização agora</span></footer>
       </div>
     </main>
