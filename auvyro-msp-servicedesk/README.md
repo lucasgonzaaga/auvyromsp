@@ -1,44 +1,56 @@
-# Auvyro MSP — Service Desk v0.1
+# Auvyro MSP — Service Desk
 
-MVP administrativo desenvolvido com React + Vite. **Somente demonstração local.**
+MVP administrativo local desenvolvido com React e Vite para demonstrar o fluxo de atendimento da Auvyro MSP.
 
 ## Requisitos
-- Windows com Node.js LTS (npm incluso)
-- VS Code
 
-## Executar
-1. Extraia o ZIP.
-2. Abra a pasta `auvyro-msp-servicedesk` no VS Code.
-3. Abra o terminal integrado (`Ctrl + J`).
-4. Execute:
+- Node.js LTS com npm
+- Navegador moderno
+
+## Executar localmente
 
 ```powershell
 npm install
 npm run dev
 ```
 
-5. Abra o endereço mostrado pelo Vite, normalmente `http://127.0.0.1:5173`.
+O Vite exibirá o endereço local, normalmente `http://127.0.0.1:5173`.
 
-## Funcionalidades
-- Dashboard com indicadores
-- Chamados de demonstração
-- Criação de novos chamados
-- Pesquisa e filtro por status
-- Atualização de prioridade, status e tempo técnico
-- Persistência no `localStorage` do navegador
-- Interface responsiva nas cores da Auvyro MSP
+## Verificação
 
-## Limitações importantes
-- Não há login, autorização, banco de dados ou isolamento por empresa.
-- O armazenamento local pode ser apagado e não é compartilhado entre dispositivos.
-- Não há SLA automático, controle contratual, trilha de auditoria nem notificações.
-- **Não use dados de clientes reais nem publique este MVP como portal operacional.**
+```powershell
+npm test
+npm run build
+```
 
-## Próxima versão
-- Supabase Auth e banco PostgreSQL
-- RLS (isolamento por empresa), papéis de cliente e administrador
-- Histórico de alterações e apontamento de horas por evento
-- SLA em horas úteis e notificações
-- Testes de permissões e políticas de retenção
+## Funcionalidades existentes
+
+- Dashboard com fila aberta, chamados críticos, aguardando, resolvidos no dia e tempo técnico histórico.
+- Criação, busca e filtro de chamados.
+- Página de detalhes com prioridade, status, responsável e datas de abertura, resolução e encerramento.
+- Ações para assumir, iniciar, resolver, encerrar e reabrir chamados.
+- Linha do tempo de eventos, comentários e apontamentos técnicos sem duplicação visual.
+- Apontamentos individuais com descrição, duração e modalidade remota ou presencial.
+- Listagens locais de clientes, equipe, configurações e apontamentos.
+- Arquivamento de chamados com justificativa, preservando seu histórico e os totais de tempo.
+- Persistência no `localStorage`, incluindo migração dos registros das versões locais anteriores.
+- Interface responsiva.
+
+## Regras do ciclo de vida
+
+- Ao resolver um chamado, o sistema registra `resolvedAt`.
+- Ao encerrar um chamado, registra `closedAt` sem apagar `resolvedAt`.
+- Ao reabrir um chamado resolvido ou encerrado, as datas do ciclo atual são limpas; as transições continuam registradas na linha do tempo.
+- Arquivar remove o chamado das filas operacionais, mas não exclui o registro nem seus apontamentos dos totais históricos.
+
+## Limitações
+
+- Não há autenticação, autorização, banco de dados ou isolamento por empresa.
+- Os dados ficam somente no navegador atual, podem ser apagados e não são compartilhados entre dispositivos.
+- Não há cálculo de SLA, calendário de horário útil, contratos, anexos, envio de e-mail ou integrações externas.
+- A área de notificações apresenta apenas atividades locais recentes; não existem notificações push ou em tempo real.
+- As telas de clientes, equipe e configurações são visões locais básicas, sem cadastro administrativo completo.
+- A linha do tempo não é uma trilha de auditoria inviolável, pois todo o armazenamento é local.
+- Este projeto é um MVP de demonstração e não deve receber dados reais de clientes nem ser usado como portal operacional de produção.
 
 Projeto da divisão **Auvyro MSP**, pertencente à **Auvyro Tech**.

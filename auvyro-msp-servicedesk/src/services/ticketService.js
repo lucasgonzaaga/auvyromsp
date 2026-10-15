@@ -12,12 +12,13 @@ const seed = [
 const nowIso = () => new Date().toISOString();
 const uid = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-function normalize(ticket) {
+export function normalizeTicket(ticket) {
   const legacyMinutes = Number(ticket.minutes) || 0;
   return {
     ...ticket,
     assignee: ticket.assignee || '',
     resolvedAt: ticket.resolvedAt || null,
+    closedAt: ticket.closedAt || null,
     archivedAt: ticket.archivedAt || null,
     archivedReason: ticket.archivedReason || '',
     comments: Array.isArray(ticket.comments) ? ticket.comments : [],
@@ -34,8 +35,8 @@ export function loadTickets() {
       if (legacyKey) raw = localStorage.getItem(legacyKey);
     }
     const parsed = raw ? JSON.parse(raw) : seed;
-    return Array.isArray(parsed) ? parsed.map(normalize) : seed;
-  } catch { return seed; }
+    return Array.isArray(parsed) ? parsed.map(normalizeTicket) : seed.map(normalizeTicket);
+  } catch { return seed.map(normalizeTicket); }
 }
 
 export function saveTickets(tickets) {
@@ -46,30 +47,58 @@ export function createTicket(tickets, form) {
   const numericIds = tickets.map((ticket) => Number(ticket.id.replace('AUV-', ''))).filter(Number.isFinite);
   const id = `AUV-${String(Math.max(0, ...numericIds) + 1).padStart(4, '0')}`;
   const createdAt = nowIso();
-  return normalize({ ...form, id, status: 'Novo', assignee: '', createdAt, resolvedAt: null, timeline: [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${form.requester}`, createdAt }] });
+  return normalizeTicket({ ...form, id, status: 'Novo', assignee: '', createdAt, resolvedAt: null, closedAt: null, timeline: [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${form.requester}`, createdAt }] });
 }
 
-export function updateTicketRecord(ticket, changes, actor = 'Alex Santos') {
-  const createdAt = nowIso();
+export function updateTicketRecord(ticket, changes, actor = 'Alex Santos', createdAt = nowIso()) {
   const events = [];
   if (changes.status && changes.status !== ticket.status) events.push({ id: uid('event'), type: 'status', text: `Status alterado de ${ticket.status} para ${changes.status}`, createdAt });
   if (changes.priority && changes.priority !== ticket.priority) events.push({ id: uid('event'), type: 'priority', text: `Prioridade alterada de ${ticket.priority} para ${changes.priority}`, createdAt });
   if (changes.assignee !== undefined && changes.assignee !== ticket.assignee) events.push({ id: uid('event'), type: 'assignee', text: changes.assignee ? `${actor} assumiu o chamado` : 'Responsável removido', createdAt });
-  const resolvedAt = changes.status === 'Resolvido' && ticket.status !== 'Resolvido' ? createdAt : changes.status && changes.status !== 'Resolvido' ? null : ticket.resolvedAt;
-  return { ...ticket, ...changes, resolvedAt, timeline: [...ticket.timeline, ...events] };
+  let resolvedAt = ticket.resolvedAt || null;
+  let closedAt = ticket.closedAt || null;
+  if (changes.status && changes.status !== ticket.status) {
+    if (changes.status === 'Resolvido') {
+      resolvedAt = createdAt;
+      closedAt = null;
+    } else if (changes.status === 'Encerrado') {
+      closedAt = createdAt;
+    } else if (['Resolvido', 'Encerrado'].includes(ticket.status)) {
+      resolvedAt = null;
+      closedAt = null;
+    }
+  }
+  return { ...ticket, ...changes, resolvedAt, closedAt, timeline: [...ticket.timeline, ...events] };
 }
 
 export function addCommentRecord(ticket, text, author = 'Alex Santos') {
   const createdAt = nowIso();
-  return { ...ticket, comments: [...ticket.comments, { id: uid('comment'), author, text, createdAt }], timeline: [...ticket.timeline, { id: uid('event'), type: 'comment', text: `${author} adicionou um comentário`, createdAt }] };
+  return { ...ticket, comments: [...ticket.comments, { id: uid('comment'), author, text, createdAt }] };
 }
 
 export function addTimeRecord(ticket, entry, author = 'Alex Santos') {
   const createdAt = nowIso();
-  return { ...ticket, timeEntries: [...ticket.timeEntries, { id: uid('time'), ...entry, minutes: Number(entry.minutes), author, createdAt }], timeline: [...ticket.timeline, { id: uid('event'), type: 'time', text: `${author} registrou ${entry.minutes} minutos (${entry.type.toLowerCase()})`, createdAt }] };
+  return { ...ticket, timeEntries: [...ticket.timeEntries, { id: uid('time'), ...entry, minutes: Number(entry.minutes), author, createdAt }] };
 }
 
 export function archiveTicketRecord(ticket, reason, actor = 'Alex Santos') {
   const createdAt = nowIso();
   return { ...ticket, archivedAt: createdAt, archivedReason: reason, timeline: [...ticket.timeline, { id: uid('event'), type: 'archived', text: `${actor} arquivou o chamado: ${reason}`, createdAt }] };
+}
+
+export function buildTicketActivity(ticket) {
+  const activity = [
+    ...(ticket.timeline || []).filter((item) => !['comment', 'time'].includes(item.type)).map((item) => ({ ...item, kind: 'event' })),
+    ...(ticket.comments || []).map((item) => ({ ...item, kind: 'comment', text: item.text })),
+    ...(ticket.timeEntries || []).map((item) => ({ ...item, kind: 'time', text: item.description })),
+  ];
+  const seen = new Set();
+  return activity
+    .filter((item) => {
+      const key = `${item.kind}:${item.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }

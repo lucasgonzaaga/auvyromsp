@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import StatusBadge from '../components/StatusBadge.jsx';
 import { formatDateTime, formatMinutes } from '../utils/date.js';
 import { getTicketMinutes } from '../utils/ticketMetrics.js';
+import { buildTicketActivity } from '../services/ticketService.js';
 
 const statuses = ['Novo', 'Em triagem', 'Em atendimento', 'Aguardando cliente', 'Aguardando terceiro', 'Resolvido', 'Encerrado'];
 const priorities = ['P1', 'P2', 'P3', 'P4'];
@@ -16,11 +17,7 @@ export default function TicketDetails({ ticket, onBack, onSave, onComment, onTim
   const [tab, setTab] = useState('timeline');
   useEffect(() => { setStatus(ticket.status); setPriority(ticket.priority); }, [ticket.id, ticket.status, ticket.priority]);
   const dirty = status !== ticket.status || priority !== ticket.priority;
-  const activity = useMemo(() => [
-    ...ticket.timeline.map((item) => ({ ...item, kind: 'event' })),
-    ...ticket.comments.map((item) => ({ ...item, kind: 'comment', text: item.text })),
-    ...ticket.timeEntries.map((item) => ({ ...item, kind: 'time', text: item.description })),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [ticket]);
+  const activity = useMemo(() => buildTicketActivity(ticket), [ticket]);
 
   function submitComment(event) { event.preventDefault(); if (!comment.trim()) return; onComment(comment.trim()); setComment(''); }
   function submitTime(event) { event.preventDefault(); if (!time.description.trim() || Number(time.minutes) <= 0) return; onTime({ ...time, description: time.description.trim() }); setTime({ description: '', minutes: 30, type: 'Remoto' }); setTab('time'); }
@@ -32,7 +29,7 @@ export default function TicketDetails({ ticket, onBack, onSave, onComment, onTim
       {!ticket.assignee && <button className="secondary action-button" onClick={() => onSave({ assignee: 'Alex Santos' })}><UserCheck size={16} />Assumir</button>}
       {!['Em atendimento', 'Resolvido', 'Encerrado'].includes(ticket.status) && <button className="secondary action-button" onClick={() => onSave({ status: 'Em atendimento', assignee: ticket.assignee || 'Alex Santos' })}><Play size={15} />Iniciar</button>}
       {!['Resolvido', 'Encerrado'].includes(ticket.status) && <button className="primary" onClick={() => onSave({ status: 'Resolvido' })}><CheckCircle2 size={16} />Resolver</button>}
-      {['Resolvido', 'Encerrado'].includes(ticket.status) && <button className="secondary action-button" onClick={() => onSave({ status: 'Em atendimento', resolvedAt: null })}><RotateCcw size={15} />Reabrir</button>}
+      {['Resolvido', 'Encerrado'].includes(ticket.status) && <button className="secondary action-button" onClick={() => onSave({ status: 'Em atendimento' })}><RotateCcw size={15} />Reabrir</button>}
     </div></section>
 
     <div className="detail-layout"><main className="detail-main">
@@ -43,7 +40,7 @@ export default function TicketDetails({ ticket, onBack, onSave, onComment, onTim
       </section>
     </main>
 
-    <aside className="detail-sidebar"><section className="property-panel"><h2>Informações</h2><label>Status<select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label><label>Prioridade<select value={priority} onChange={(event) => setPriority(event.target.value)}>{priorities.map((item) => <option key={item}>{item}</option>)}</select></label><div className="property"><small>RESPONSÁVEL</small><strong>{ticket.assignee || 'Não atribuído'}</strong></div><div className="property"><small>ABERTURA</small><strong>{formatDateTime(ticket.createdAt)}</strong></div><div className="property"><small>RESOLUÇÃO</small><strong>{formatDateTime(ticket.resolvedAt)}</strong></div><div className="property"><small>TEMPO REGISTRADO</small><strong>{formatMinutes(getTicketMinutes(ticket))}</strong></div><button className="save-button" disabled={!dirty} onClick={() => onSave({ status, priority })}>{dirty ? 'Salvar alterações' : 'Sem alterações pendentes'}</button></section>
+    <aside className="detail-sidebar"><section className="property-panel"><h2>Informações</h2><label>Status<select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label><label>Prioridade<select value={priority} onChange={(event) => setPriority(event.target.value)}>{priorities.map((item) => <option key={item}>{item}</option>)}</select></label><div className="property"><small>RESPONSÁVEL</small><strong>{ticket.assignee || 'Não atribuído'}</strong></div><div className="property"><small>ABERTURA</small><strong>{formatDateTime(ticket.createdAt)}</strong></div><div className="property"><small>RESOLUÇÃO</small><strong>{formatDateTime(ticket.resolvedAt)}</strong></div><div className="property"><small>ENCERRAMENTO</small><strong>{formatDateTime(ticket.closedAt)}</strong></div><div className="property"><small>TEMPO REGISTRADO</small><strong>{formatMinutes(getTicketMinutes(ticket))}</strong></div><button className="save-button" disabled={!dirty} onClick={() => onSave({ status, priority })}>{dirty ? 'Salvar alterações' : 'Sem alterações pendentes'}</button></section>
       <section className="archive-panel"><h3>Arquivar chamado</h3><p>O registro será preservado e removido das filas ativas.</p><textarea rows="2" value={archiveReason} onChange={(event) => setArchiveReason(event.target.value)} placeholder="Informe o motivo" /><button disabled={!archiveReason.trim()} onClick={archive}>Arquivar com justificativa</button></section>
     </aside></div>
   </div>;

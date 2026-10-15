@@ -66,7 +66,7 @@ export default function App() {
         {view === 'dashboard' && <Dashboard tickets={activeTickets} metrics={metrics} onCreate={() => setNewTicketOpen(true)} onOpen={openTicket} onSeeAll={() => navigate('tickets')} />}
         {view === 'tickets' && <Tickets tickets={filtered} search={search} filter={filter} onSearch={setSearch} onFilter={setFilter} onCreate={() => setNewTicketOpen(true)} onOpen={openTicket} searchRef={searchRef} />}
         {view === 'clients' && <Clients tickets={activeTickets} onSelect={selectClient} />}
-        {view === 'time' && <TimeEntries tickets={activeTickets} onOpen={openTicket} />}
+        {view === 'time' && <TimeEntries tickets={tickets} onOpen={openTicket} />}
         {(view === 'team' || view === 'settings') && <InfoPage type={view} />}
         {view === 'details' && selected && <TicketDetails ticket={selected} onBack={() => navigate('tickets')} onSave={updateSelected} onComment={addComment} onTime={addTime} onArchive={archiveSelected} />}
         <footer><span>Auvyro MSP · Central de serviços v0.2</span><span>Dados locais · última atualização agora</span></footer>
