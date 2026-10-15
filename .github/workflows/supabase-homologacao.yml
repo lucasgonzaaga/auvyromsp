@@ -42,14 +42,18 @@ jobs:
         with:
           version: 2.84.2
       - run: npm ci
-      - run: supabase db start
+      - run: supabase start
       - run: supabase test db
       - name: Exportar configuração local sem persistir segredos
         run: |
-          supabase status -o env \
+          eval "$(supabase status -o env \
             --override-name api.url=VITE_SUPABASE_URL \
-            --override-name auth.anon_key=VITE_SUPABASE_ANON_KEY >> "$GITHUB_ENV"
-          echo "VITE_APP_MODE=hosted" >> "$GITHUB_ENV"
+            --override-name auth.anon_key=VITE_SUPABASE_ANON_KEY)"
+          {
+            echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL"
+            echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY"
+            echo "VITE_APP_MODE=hosted"
+          } >> "$GITHUB_ENV"
       - run: npm run build:hosted
       - if: always()
         run: supabase stop --no-backup
