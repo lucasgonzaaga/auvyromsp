@@ -34,11 +34,14 @@ Nunca coloque a `service_role` em arquivos `.env` do Vite ou no navegador. A cha
 
 ```powershell
 npm test
-npm run build
 npm run test:db
+npm run build:hosted
+npm run test:e2e
 ```
 
-Builds destinados a ambiente hospedado devem usar `npm run build:hosted`. Esse comando falha se `VITE_APP_MODE=hosted`, a URL ou a chave anônima estiverem ausentes. `npm run build` continua disponível para a demonstração local.
+Builds destinados a ambiente hospedado devem usar obrigatoriamente `npm run build:hosted`. Esse comando falha se `VITE_APP_MODE=hosted`, a URL ou a chave anônima estiverem ausentes. `npm run build` continua disponível somente para demonstração local e é bloqueado automaticamente em CI e nos provedores de hospedagem reconhecidos.
+
+O GitHub Actions inicia o Supabase completo, executa pgTAP, gera exclusivamente o build hospedado e valida em Chromium o login real dos quatro perfis e o fluxo operacional persistido. Nenhum secret remoto é necessário.
 
 ## Funcionalidades existentes
 
@@ -51,7 +54,7 @@ Builds destinados a ambiente hospedado devem usar `npm run build:hosted`. Esse c
 - Linha do tempo de eventos, comentários e apontamentos técnicos sem duplicação visual.
 - Chamados e apontamentos vinculados por IDs de empresa, contato e contrato, com bloqueio de vínculos entre empresas diferentes.
 - A escolha “Sem contrato” é preservada; o sistema nunca associa um Office Care automaticamente.
-- Apontamentos individuais com descrição, duração, modalidade, empresa, contrato, competência mensal e classificação como franquia ou faturável.
+- Apontamentos individuais com descrição, duração, modalidade, empresa, contrato, competência mensal e classificação coerente como franquia, faturável ou não consumido.
 - A competência do apontamento deve corresponder ao mês da data do atendimento; divergências são bloqueadas antes do registro.
 - Atendimentos presenciais faturáveis por padrão; exceções não faturáveis exigem justificativa.
 - Apenas suporte remoto não faturável, vinculado a contrato ativo e vigente, consome a franquia. Cortesias presenciais justificadas não consomem horas.
@@ -91,6 +94,6 @@ Builds destinados a ambiente hospedado devem usar `npm run build:hosted`. Esse c
 - A área de notificações apresenta apenas atividades locais recentes; não existem notificações push ou em tempo real.
 - As telas de clientes, equipe e configurações são visões locais básicas, sem cadastro administrativo completo.
 - No modo demo, a linha do tempo não é uma trilha de auditoria inviolável; no modo Supabase, a auditoria é inserida por triggers e protegida contra escrita direta.
-- Antes de receber dados reais, ainda é necessário executar os testes pgTAP em uma instância Supabase local, definir backup/recuperação e validar o fluxo completo em ambiente de homologação.
+- Antes de receber dados reais, ainda é necessário definir e testar backup, recuperação, monitoramento e resposta a incidentes em um projeto remoto exclusivo de homologação.
 
 Projeto da divisão **Auvyro MSP**, pertencente à **Auvyro Tech**.

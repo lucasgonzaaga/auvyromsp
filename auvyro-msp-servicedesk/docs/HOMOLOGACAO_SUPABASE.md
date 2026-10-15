@@ -12,7 +12,6 @@ npm ci
 supabase start
 supabase test db
 npm test
-npm run build
 ```
 
 Para testar a interface autenticada, obtenha a URL e a chave anônima locais com `supabase status`, crie um `.env.local` ignorado pelo Git e use:
@@ -21,6 +20,14 @@ Para testar a interface autenticada, obtenha a URL e a chave anônima locais com
 VITE_APP_MODE=hosted
 VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_ANON_KEY=<anon key retornada localmente>
+```
+
+Com essas variáveis carregadas, conclua a validação da interface hospedada:
+
+```powershell
+npm run build:hosted
+npx playwright install chromium
+npm run test:e2e
 ```
 
 Contas fictícias: `admin@auvyro.local`, `tecnico@auvyro.local`, `cliente.a@auvyro.local` e `cliente.b@auvyro.local`.
@@ -48,7 +55,7 @@ Chamados, comentários, apontamentos e histórico não aceitam exclusão pelos p
 6. Sair, entrar novamente e confirmar persistência de chamado, comentários, apontamentos e datas.
 7. Entrar como cliente B e confirmar que nenhum registro da Empresa Aurora é visível.
 
-Os testes pgTAP automatizam isolamento, papéis, IDs forjados e escritas proibidas. O roteiro visual confirma a integração completa da interface.
+Os testes pgTAP automatizam isolamento, papéis, IDs forjados e escritas proibidas. O teste Playwright executa o login real dos quatro usuários pelo Supabase Auth e valida pela interface: isolamento dos clientes, criação e persistência do chamado, comentário, atribuição, transições, consumo de franquia, excedente, presencial faturável, cortesia presencial, encerramento, arquivamento e novo login. O roteiro acima permanece útil para inspeção exploratória.
 
 ## Homologação remota
 
@@ -62,5 +69,5 @@ Os testes pgTAP automatizam isolamento, papéis, IDs forjados e escritas proibid
 ## Riscos remanescentes
 
 - Backup, restauração e retenção precisam ser definidos antes de dados reais.
-- A validação visual ponta a ponta depende de Supabase local ou projeto remoto de homologação acessível.
+- A validação automatizada ponta a ponta usa o Supabase local e dados descartáveis; a validação de conectividade de um projeto remoto continua sendo responsabilidade da homologação antes do uso real.
 - Não há SLA, anexos, e-mail, inventário remoto nem cobrança financeira.
