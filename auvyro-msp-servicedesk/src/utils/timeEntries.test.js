@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getCompetence, groupTimeConsumption, normalizeTimeEntry } from './timeEntries.js';
+import { getCompetence, getTimeEntryClassification, groupTimeConsumption, normalizeTimeEntry } from './timeEntries.js';
 
 test('obtém a competência de datas civis sem deslocamento de fuso horário', () => {
   assert.equal(getCompetence('2026-10-01'), '2026-10');
@@ -26,4 +26,11 @@ test('agrupa consumo por empresa, contrato, competência, modalidade e faturabil
   assert.equal(franchise.minutes, 75);
   assert.equal(franchise.entries, 2);
   assert.equal(franchise.billable, false);
+});
+
+test('classifica apontamentos conforme faturamento e consumo da franquia', () => {
+  assert.equal(getTimeEntryClassification({ contractId: 'CTR-1', type: 'Remoto', billable: false, consumesFranchise: true }), 'Franquia');
+  assert.equal(getTimeEntryClassification({ type: 'Presencial', billable: true, consumesFranchise: false }), 'Faturável');
+  assert.equal(getTimeEntryClassification({ type: 'Presencial', billable: false, consumesFranchise: false, billingExceptionReason: 'Cortesia' }), 'Não consome');
+  assert.equal(getTimeEntryClassification({ contractId: null, type: 'Remoto', billable: false, consumesFranchise: false }), 'Não consome');
 });

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { loadOperationalData } from './supabaseRepository.js';
 
 function fakeClient(tables) {
-  return { from(name) { const result = Promise.resolve({ data: tables[name] || [], error: null }); const builder = { select() { return builder; }, order() { return result; }, then(resolve, reject) { return result.then(resolve, reject); } }; return builder; } };
+  return { from(name) { const builder = { select() { return builder; }, order() { return builder; }, range(from, to) { return Promise.resolve({ data: (tables[name] || []).slice(from, to + 1), error: null }); } }; return builder; } };
 }
 
 test('carrega e relaciona dados operacionais exclusivamente pelo cliente Supabase informado', async () => {
@@ -24,4 +24,15 @@ test('carrega e relaciona dados operacionais exclusivamente pelo cliente Supabas
   assert.equal(data.tickets[0].status, 'Em atendimento');
   assert.equal(data.tickets[0].comments[0].author, 'Técnica');
   assert.equal(data.tickets[0].timeEntries[0].competence, '2026-10');
+});
+
+test('pagina consultas acima do limite padrão do Supabase', async () => {
+  const companies = Array.from({ length: 501 }, (_, index) => ({ id: `company-${index}`, code: `CLI-${index}`, name: `Empresa ${index}`, active: true }));
+  const data = await loadOperationalData(fakeClient({ companies }));
+  assert.equal(data.clients.length, 501);
+});
+
+test('propaga falhas de consulta sem retornar estado vazio como sucesso', async () => {
+  const client = { from() { const builder = { select() { return builder; }, order() { return builder; }, range() { return Promise.resolve({ data: null, error: new Error('RLS failure') }); } }; return builder; } };
+  await assert.rejects(() => loadOperationalData(client), /RLS failure/);
 });

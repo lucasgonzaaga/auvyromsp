@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import App from '../App.jsx';
-import { isSupabaseConfigured, supabase } from '../lib/supabase.js';
+import { hostedConfigurationError, isSupabaseConfigured, supabase } from '../lib/supabase.js';
 
 async function loadIdentity(session) {
   if (!session?.user) return null;
@@ -43,6 +43,7 @@ export default function AuthGate() {
     return () => { active = false; listener.subscription.unsubscribe(); };
   }, []);
 
+  if (hostedConfigurationError) return <div className="auth-screen"><div className="auth-card"><p className="overline">CONFIGURAÇÃO INCOMPLETA</p><h1>Acesso indisponível</h1><p>{hostedConfigurationError}</p></div></div>;
   if (!isSupabaseConfigured) return <App />;
   if (loading) return <div className="auth-screen"><div className="auth-card"><p>Validando sessão segura…</p></div></div>;
   if (identity) return <App currentUserOverride={identity} onSignOut={() => supabase.auth.signOut()} />;
