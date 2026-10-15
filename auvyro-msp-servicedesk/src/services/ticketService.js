@@ -1,4 +1,5 @@
 import { normalizeTimeEntry } from '../utils/timeEntries.js';
+import { assertContractCompany } from './contractService.js';
 
 const STORAGE_KEY = 'auvyro-msp-tickets-v3';
 const LEGACY_KEYS = ['auvyro-msp-demo-tickets-v2', 'auvyro-msp-demo-tickets-v1'];
@@ -38,10 +39,20 @@ function actorName(actor) {
   return name;
 }
 
-export function normalizeTicket(ticket) {
+export function normalizeTicket(ticket, clients = [], contracts = []) {
   const legacyMinutes = Number(ticket.minutes) || 0;
+  const client = clients.find((item) => item.id === ticket.companyId) || clients.find((item) => item.name === ticket.company);
+  const contact = client?.contacts.find((item) => item.id === ticket.requesterId) || client?.contacts.find((item) => item.name === ticket.requester);
+  const companyId = client?.id || ticket.companyId || null;
+  const contract = contracts.find((item) => item.id === ticket.contractId && item.companyId === companyId) || contracts.find((item) => item.companyId === companyId && item.status === 'Ativo');
+  const contractId = contracts.length ? contract?.id || null : ticket.contractId || null;
   return {
     ...ticket,
+    companyId,
+    company: client?.name || ticket.company || '',
+    requesterId: contact?.id || ticket.requesterId || null,
+    requester: contact?.name || ticket.requester || '',
+    contractId,
     assignee: ticket.assignee || '',
     resolvedAt: ticket.resolvedAt || null,
     closedAt: ticket.closedAt || null,
@@ -49,11 +60,11 @@ export function normalizeTicket(ticket) {
     archivedReason: ticket.archivedReason || '',
     comments: Array.isArray(ticket.comments) ? ticket.comments : [],
     timeline: Array.isArray(ticket.timeline) && ticket.timeline.length ? ticket.timeline : [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${ticket.requester}`, createdAt: ticket.createdAt }],
-    timeEntries: (Array.isArray(ticket.timeEntries) ? ticket.timeEntries : legacyMinutes ? [{ id: uid('time'), description: 'Tempo importado da versão anterior', minutes: legacyMinutes, type: 'Remoto', author: 'Equipe Auvyro', createdAt: ticket.createdAt }] : []).map((entry) => normalizeTimeEntry(entry, ticket)),
+    timeEntries: (Array.isArray(ticket.timeEntries) ? ticket.timeEntries : legacyMinutes ? [{ id: uid('time'), description: 'Tempo importado da versão anterior', minutes: legacyMinutes, type: 'Remoto', author: 'Equipe Auvyro', createdAt: ticket.createdAt }] : []).map((entry) => normalizeTimeEntry(entry, { ...ticket, companyId, company: client?.name || ticket.company || '', contractId })),
   };
 }
 
-export function loadTickets() {
+export function loadTickets(clients = [], contracts = []) {
   try {
     let raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
@@ -61,19 +72,24 @@ export function loadTickets() {
       if (legacyKey) raw = localStorage.getItem(legacyKey);
     }
     const parsed = raw ? JSON.parse(raw) : seed;
-    return Array.isArray(parsed) ? parsed.map(normalizeTicket) : seed.map(normalizeTicket);
-  } catch { return seed.map(normalizeTicket); }
+    return Array.isArray(parsed) ? parsed.map((ticket) => normalizeTicket(ticket, clients, contracts)) : seed.map((ticket) => normalizeTicket(ticket, clients, contracts));
+  } catch { return seed.map((ticket) => normalizeTicket(ticket, clients, contracts)); }
 }
 
 export function saveTickets(tickets) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
 }
 
-export function createTicket(tickets, form) {
+export function createTicket(tickets, form, clients, contracts) {
+  const client = clients.find((item) => item.id === form.companyId);
+  if (!client) throw new RangeError('Empresa não encontrada.');
+  const contact = client.contacts.find((item) => item.id === form.requesterId && item.authorized);
+  if (!contact) throw new RangeError('O solicitante não é um contato autorizado da empresa.');
+  assertContractCompany(form.contractId, client.id, contracts);
   const numericIds = tickets.map((ticket) => Number(ticket.id.replace('AUV-', ''))).filter(Number.isFinite);
   const id = `AUV-${String(Math.max(0, ...numericIds) + 1).padStart(4, '0')}`;
   const createdAt = nowIso();
-  return normalizeTicket({ ...form, id, status: 'Novo', assignee: '', createdAt, resolvedAt: null, closedAt: null, timeline: [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${form.requester}`, createdAt }] });
+  return normalizeTicket({ ...form, company: client.name, requester: contact.name, id, status: 'Novo', assignee: '', createdAt, resolvedAt: null, closedAt: null, timeline: [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${contact.name}`, createdAt }] }, clients, contracts);
 }
 
 export function updateTicketRecord(ticket, changes, actor, createdAt = nowIso()) {
@@ -107,10 +123,14 @@ export function addCommentRecord(ticket, text, actor) {
   return { ...ticket, comments: [...ticket.comments, { id: uid('comment'), author, text, createdAt }] };
 }
 
-export function addTimeRecord(ticket, entry, actor) {
+export function addTimeRecord(ticket, entry, actor, contracts = []) {
   const author = actorName(actor);
   const createdAt = nowIso();
-  const timeEntry = normalizeTimeEntry({ id: uid('time'), ...entry, minutes: Number(entry.minutes), author, createdAt }, ticket);
+  const contractId = entry.contractId || ticket.contractId || null;
+  assertContractCompany(contractId, ticket.companyId, contracts);
+  const billable = entry.type === 'Presencial' ? entry.billable !== false : entry.billable === true;
+  if (entry.type === 'Presencial' && !billable && !entry.billingExceptionReason?.trim()) throw new RangeError('Atendimento presencial não faturável exige justificativa.');
+  const timeEntry = normalizeTimeEntry({ id: uid('time'), ...entry, contractId, billable, billingExceptionReason: entry.billingExceptionReason?.trim() || '', minutes: Number(entry.minutes), author, createdAt }, ticket);
   return { ...ticket, timeEntries: [...ticket.timeEntries, timeEntry] };
 }
 

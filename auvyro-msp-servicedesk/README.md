@@ -27,11 +27,16 @@ npm run build
 
 - Dashboard com fila aberta, chamados críticos, aguardando, resolvidos no dia e tempo técnico histórico.
 - Criação, busca e filtro de chamados.
+- Cadastro independente de empresas com IDs estáveis, documento fictício, contatos autorizados e equipamentos.
+- Contratos Office Care vinculados por ID à empresa, com status, vigência, limite fixo de oito computadores e franquia mensal de quatro horas.
 - Página de detalhes com prioridade, status, responsável e datas de abertura, resolução e encerramento.
 - Ações para assumir, iniciar, resolver, encerrar e reabrir chamados, respeitando transições de estado validadas pelo domínio.
 - Linha do tempo de eventos, comentários e apontamentos técnicos sem duplicação visual.
-- Apontamentos individuais com descrição, duração, modalidade, empresa, referência de contrato, competência mensal e classificação como franquia ou faturável.
+- Chamados e apontamentos vinculados por IDs de empresa, contato e contrato, com bloqueio de vínculos entre empresas diferentes.
+- Apontamentos individuais com descrição, duração, modalidade, empresa, contrato, competência mensal e classificação como franquia ou faturável.
+- Atendimentos presenciais faturáveis por padrão; exceções não faturáveis exigem justificativa.
 - Consolidação histórica de consumo por empresa, contrato, competência, modalidade e classificação faturável.
+- Cálculo mensal de consumo incluído, saldo de franquia, excedente e minutos faturáveis.
 - Listagens locais de clientes, equipe, configurações e apontamentos.
 - Arquivamento de chamados com justificativa, preservando seu histórico e os totais de tempo.
 - Persistência no `localStorage`, incluindo migração dos registros das versões locais anteriores.
@@ -49,8 +54,10 @@ npm run build
 
 - Não há autenticação, autorização, banco de dados ou isolamento por empresa. As operações recebem a identidade da sessão, mas usam um usuário local não autenticado enquanto essa integração não existir.
 - Os dados ficam somente no navegador atual, podem ser apagados e não são compartilhados entre dispositivos.
-- Não há cálculo de SLA, calendário de horário útil, cadastro ou validação de contratos, anexos, envio de e-mail ou integrações externas. A referência contratual dos apontamentos é atualmente um campo local livre.
-- A consolidação mensal calcula consumo registrado, mas ainda não aplica limites de franquia, valores, impostos ou regras de faturamento.
+- Não há cálculo de SLA, calendário de horário útil, anexos, envio de e-mail ou integrações externas.
+- Os contratos são registros locais fictícios; não há assinatura, reajuste, valores monetários, impostos, emissão de cobrança ou integração contábil.
+- A consolidação mensal calcula minutos incluídos, saldo e excedente, mas não transforma esses dados em cobrança financeira.
+- O limite de oito computadores é validado no contrato, mas não existe descoberta automática, inventário remoto ou confirmação física dos equipamentos.
 - A área de notificações apresenta apenas atividades locais recentes; não existem notificações push ou em tempo real.
 - As telas de clientes, equipe e configurações são visões locais básicas, sem cadastro administrativo completo.
 - A linha do tempo não é uma trilha de auditoria inviolável, pois todo o armazenamento é local.

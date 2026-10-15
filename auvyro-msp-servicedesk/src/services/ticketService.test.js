@@ -73,3 +73,14 @@ test('novos comentários e apontamentos não criam eventos genéricos duplicados
   assert.equal(timed.timeEntries.length, 1);
   assert.equal(buildTicketActivity(timed).length, 3);
 });
+
+test('presencial é faturável por padrão e exige justificativa para exceção', () => {
+  const base = ticket({ companyId: 'CLI-0001', contractId: 'CTR-0001' });
+  const contracts = [{ id: 'CTR-0001', companyId: 'CLI-0001' }];
+  const billed = addTimeRecord(base, { description: 'Visita', minutes: 60, type: 'Presencial', competence: '2026-10' }, { name: 'Técnico' }, contracts);
+  assert.equal(billed.timeEntries[0].billable, true);
+  assert.throws(() => addTimeRecord(base, { description: 'Visita', minutes: 60, type: 'Presencial', billable: false, competence: '2026-10' }, { name: 'Técnico' }, contracts), /exige justificativa/);
+  const exception = addTimeRecord(base, { description: 'Visita', minutes: 60, type: 'Presencial', billable: false, billingExceptionReason: 'Cortesia aprovada', competence: '2026-10' }, { name: 'Técnico' }, contracts);
+  assert.equal(exception.timeEntries[0].billable, false);
+  assert.equal(exception.timeEntries[0].billingExceptionReason, 'Cortesia aprovada');
+});

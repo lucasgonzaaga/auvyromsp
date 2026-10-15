@@ -8,6 +8,7 @@ export function getCompetence(value) {
 export function normalizeTimeEntry(entry, ticket = {}) {
   return {
     ...entry,
+    companyId: entry.companyId || ticket.companyId || null,
     company: entry.company || ticket.company || '',
     contractId: entry.contractId || ticket.contractId || null,
     competence: entry.competence || getCompetence(entry.createdAt),

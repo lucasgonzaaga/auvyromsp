@@ -1,6 +1,6 @@
 import { Bell, ChevronRight, Command, Menu } from 'lucide-react';
 
-const labels = { dashboard: 'Visão geral', tickets: 'Chamados', clients: 'Clientes', time: 'Apontamentos', team: 'Equipe', settings: 'Configurações', details: 'Detalhes do chamado' };
+const labels = { dashboard: 'Visão geral', tickets: 'Chamados', clients: 'Clientes', contracts: 'Contratos Office Care', time: 'Apontamentos', team: 'Equipe', settings: 'Configurações', details: 'Detalhes do chamado' };
 
 export default function Topbar({ active, currentUser, notificationCount, notificationsOpen, onMenu, onQuickSearch, onNotifications }) {
   return <header className="topbar">

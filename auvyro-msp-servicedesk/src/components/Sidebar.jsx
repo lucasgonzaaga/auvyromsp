@@ -1,9 +1,10 @@
-import { ChevronDown, CircleHelp, Clock3, Headphones, LayoutDashboard, Settings, Ticket, Users } from 'lucide-react';
+import { BriefcaseBusiness, ChevronDown, CircleHelp, Clock3, Headphones, LayoutDashboard, Settings, Ticket, Users } from 'lucide-react';
 
 const items = [
   { id: 'dashboard', label: 'Visão geral', icon: LayoutDashboard, group: 'OPERAÇÃO' },
   { id: 'tickets', label: 'Chamados', icon: Ticket },
   { id: 'clients', label: 'Clientes', icon: Users },
+  { id: 'contracts', label: 'Contratos', icon: BriefcaseBusiness },
   { id: 'time', label: 'Apontamentos', icon: Clock3 },
   { id: 'team', label: 'Equipe', icon: Headphones, group: 'GESTÃO' },
   { id: 'settings', label: 'Configurações', icon: Settings },
