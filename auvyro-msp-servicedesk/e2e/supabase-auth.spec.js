@@ -23,7 +23,7 @@ async function logout(page) {
 }
 
 async function openTickets(page) {
-  await page.getByRole('button', { name: 'Chamados', exact: true }).click();
+  await page.locator('.sidebar nav').getByRole('button', { name: /^Chamados/ }).click();
   await expect(page.getByRole('heading', { name: 'Chamados', exact: true })).toBeVisible();
 }
 
