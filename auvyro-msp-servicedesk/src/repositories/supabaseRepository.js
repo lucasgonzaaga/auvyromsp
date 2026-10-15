@@ -6,7 +6,7 @@ const contractFromDb = { active: 'Ativo', suspended: 'Suspenso', expired: 'Venci
 const contractToDb = Object.fromEntries(Object.entries(contractFromDb).map(([key, value]) => [value, key]));
 const modeFromDb = { remote: 'Remoto', onsite: 'Presencial' };
 const modeToDb = { Remoto: 'remote', Presencial: 'onsite' };
-const code = (prefix) => `${prefix}-${globalThis.crypto.randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase()}`;
+const PAGE_SIZE = 500;
 
 function assertClient(client) {
   if (!client) throw new Error('Supabase não configurado.');
@@ -18,14 +18,25 @@ function unwrap(result) {
   return result.data;
 }
 
+async function fetchAll(db, table, columns = '*', order = null) {
+  const rows = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    let query = db.from(table).select(columns);
+    if (order) query = query.order(order);
+    const page = unwrap(await query.range(from, from + PAGE_SIZE - 1));
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) return rows;
+  }
+}
+
 export async function loadOperationalData(client = supabase) {
   const db = assertClient(client);
   const [companies, contacts, equipment, contracts, contractEquipment, tickets, comments, history, entries, profiles] = await Promise.all([
-    db.from('companies').select('*').order('name'), db.from('contacts').select('*').order('name'), db.from('equipment').select('*').order('name'),
-    db.from('contracts').select('*').order('created_at'), db.from('contract_equipment').select('*'), db.from('tickets').select('*').order('created_at', { ascending: false }),
-    db.from('ticket_comments').select('*').order('created_at'), db.from('ticket_history').select('*').order('created_at'),
-    db.from('time_entries').select('*').order('created_at'), db.from('profiles').select('id, display_name'),
-  ]).then((results) => results.map(unwrap));
+    fetchAll(db, 'companies', '*', 'name'), fetchAll(db, 'contacts', '*', 'name'), fetchAll(db, 'equipment', '*', 'name'),
+    fetchAll(db, 'contracts', '*', 'created_at'), fetchAll(db, 'contract_equipment'), fetchAll(db, 'tickets', '*', 'created_at'),
+    fetchAll(db, 'ticket_comments', '*', 'created_at'), fetchAll(db, 'ticket_history', '*', 'created_at'),
+    fetchAll(db, 'time_entries', '*', 'created_at'), fetchAll(db, 'profiles', 'id, display_name'),
+  ]);
   const profileNames = new Map(profiles.map((profile) => [profile.id, profile.display_name]));
   const clients = companies.map((company) => ({
     id: company.id, code: company.code, name: company.name, document: company.document || '', status: company.active ? 'Ativo' : 'Inativo',
@@ -56,19 +67,19 @@ export async function loadOperationalData(client = supabase) {
 }
 
 export async function createCompany(data, client = supabase) {
-  return unwrap(await assertClient(client).from('companies').insert({ code: code('CLI'), name: data.name.trim(), document: data.document?.trim() || null }).select().single());
+  return unwrap(await assertClient(client).from('companies').insert({ name: data.name.trim(), document: data.document?.trim() || null }).select().single());
 }
 export async function createContact(companyId, data, client = supabase) {
-  return unwrap(await assertClient(client).from('contacts').insert({ company_id: companyId, code: code('CON'), name: data.name.trim(), email: data.email.trim(), phone: data.phone?.trim() || null, authorized: data.authorized !== false }).select().single());
+  return unwrap(await assertClient(client).from('contacts').insert({ company_id: companyId, name: data.name.trim(), email: data.email.trim(), phone: data.phone?.trim() || null, authorized: data.authorized !== false }).select().single());
 }
 export async function createEquipment(companyId, data, client = supabase) {
-  return unwrap(await assertClient(client).from('equipment').insert({ company_id: companyId, code: code('EQP'), name: data.name.trim(), type: data.type || 'Desktop', serial: data.serial?.trim() || null }).select().single());
+  return unwrap(await assertClient(client).from('equipment').insert({ company_id: companyId, name: data.name.trim(), type: data.type || 'Desktop', serial: data.serial?.trim() || null }).select().single());
 }
 export async function createContract(data, client = supabase) {
-  return unwrap(await assertClient(client).rpc('create_office_care_contract', { p_company_id: data.companyId, p_code: code('CTR'), p_starts_at: data.startsAt, p_ends_at: data.endsAt, p_status: contractToDb[data.status] || 'active', p_equipment_ids: data.equipmentIds || [] }));
+  return unwrap(await assertClient(client).rpc('create_office_care_contract', { p_company_id: data.companyId, p_starts_at: data.startsAt, p_ends_at: data.endsAt, p_status: contractToDb[data.status] || 'active', p_equipment_ids: data.equipmentIds || [] }));
 }
 export async function createTicket(data, client = supabase) {
-  return unwrap(await assertClient(client).from('tickets').insert({ code: code('AUV'), company_id: data.companyId, requester_id: data.requesterId, contract_id: data.contractId || null, title: data.title.trim(), description: data.description.trim(), priority: data.priority, status: 'new' }).select().single());
+  return unwrap(await assertClient(client).from('tickets').insert({ company_id: data.companyId, requester_id: data.requesterId, contract_id: data.contractId || null, title: data.title.trim(), description: data.description.trim(), priority: data.priority, status: 'new' }).select().single());
 }
 export async function updateTicket(ticket, changes, currentUser, client = supabase) {
   const update = {};

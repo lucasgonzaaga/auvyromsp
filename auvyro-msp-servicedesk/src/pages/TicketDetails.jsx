@@ -27,8 +27,8 @@ export default function TicketDetails({ ticket, contracts, currentUser, canManag
   const today = new Date().toISOString().slice(0, 10);
   const availableContracts = contracts.filter((contract) => contract.companyId === ticket.companyId && contract.status === 'Ativo' && contract.startsAt <= today && contract.endsAt >= today);
 
-  async function submitComment(event) { event.preventDefault(); if (!comment.trim()) return; await onComment(comment.trim()); setComment(''); }
-  async function submitTime(event) { event.preventDefault(); if (!time.description.trim() || Number(time.minutes) <= 0) return; await onTime({ ...time, description: time.description.trim(), contractId: time.contractId || null }); setTime(emptyTime(ticket.contractId || '')); setTab('time'); }
+  async function submitComment(event) { event.preventDefault(); if (!comment.trim()) return; const created = await onComment(comment.trim()); if (!created) return; setComment(''); }
+  async function submitTime(event) { event.preventDefault(); if (!time.description.trim() || Number(time.minutes) <= 0) return; const created = await onTime({ ...time, description: time.description.trim(), contractId: time.contractId || null }); if (!created) return; setTime(emptyTime(ticket.contractId || '')); setTab('time'); }
   async function archive() { if (!archiveReason.trim()) return; await onArchive(archiveReason.trim()); }
 
   return <div className="ticket-details">

@@ -1,0 +1,55 @@
+name: Supabase homologacao v0.4.2
+
+on:
+  push:
+    branches: [feature/supabase-homologacao-v042]
+  pull_request:
+    branches: [prod]
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: auvyro-msp-servicedesk/package-lock.json
+      - working-directory: auvyro-msp-servicedesk
+        run: npm ci
+      - working-directory: auvyro-msp-servicedesk
+        run: npm test
+      - working-directory: auvyro-msp-servicedesk
+        run: npm run build
+
+  database:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: auvyro-msp-servicedesk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: auvyro-msp-servicedesk/package-lock.json
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.84.2
+      - run: npm ci
+      - run: supabase db start
+      - run: supabase test db
+      - name: Exportar configuração local sem persistir segredos
+        run: |
+          supabase status -o env \
+            --override-name api.url=VITE_SUPABASE_URL \
+            --override-name auth.anon_key=VITE_SUPABASE_ANON_KEY >> "$GITHUB_ENV"
+          echo "VITE_APP_MODE=hosted" >> "$GITHUB_ENV"
+      - run: npm run build:hosted
+      - if: always()
+        run: supabase stop --no-backup
