@@ -20,11 +20,18 @@ export function normalizeTimeEntry(entry, ticket = {}) {
   };
 }
 
+export function getTimeEntryClassification(entry) {
+  const normalized = normalizeTimeEntry(entry);
+  if (normalized.consumesFranchise) return 'Franquia';
+  if (normalized.billable) return 'Faturável';
+  return 'Não consome';
+}
+
 export function groupTimeConsumption(entries) {
   const groups = new Map();
   entries.forEach((entry) => {
     const normalized = normalizeTimeEntry(entry);
-    const classification = normalized.consumesFranchise ? 'Franquia' : normalized.billable ? 'Faturável' : 'Não consome';
+    const classification = getTimeEntryClassification(normalized);
     const key = [normalized.company, normalized.contractId || 'Sem contrato', normalized.competence || 'Sem competência', normalized.type || 'Não informada', classification].join('|');
     const current = groups.get(key) || {
       company: normalized.company,
