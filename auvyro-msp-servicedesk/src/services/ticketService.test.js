@@ -67,7 +67,7 @@ test('linha do tempo exibe comentários e apontamentos uma única vez', () => {
 test('novos comentários e apontamentos não criam eventos genéricos duplicados', () => {
   const original = ticket({ timeline: [{ id: 'created-1', type: 'created', text: 'Chamado aberto', createdAt: '2026-10-15T08:00:00.000Z' }] });
   const commented = addCommentRecord(original, 'Retorno enviado', 'Técnico');
-  const timed = addTimeRecord(commented, { description: 'Diagnóstico', minutes: 30, type: 'Remoto', competence: '2026-10' }, 'Técnico');
+  const timed = addTimeRecord(commented, { description: 'Diagnóstico', minutes: 30, type: 'Remoto', competence: '2026-10', performedAt: '2026-10-15' }, 'Técnico');
   assert.equal(timed.timeline.length, 1);
   assert.equal(timed.comments.length, 1);
   assert.equal(timed.timeEntries.length, 1);
@@ -91,7 +91,7 @@ test('respeita Sem contrato e nunca vincula Office Care automaticamente', () => 
   const contracts = [{ id: 'CTR-0001', companyId: 'CLI-0001', status: 'Ativo', startsAt: '2026-01-01', endsAt: '2027-12-31' }];
   const normalized = normalizeTicket({ ...ticket(), companyId: 'CLI-0001', company: 'Cliente', contractId: null }, clients, contracts);
   assert.equal(normalized.contractId, null);
-  const pointed = addTimeRecord({ ...normalized, timeEntries: [] }, { description: 'Análise', minutes: 30, type: 'Remoto', competence: '2026-10', contractId: null }, { name: 'Técnico' }, contracts);
+  const pointed = addTimeRecord({ ...normalized, timeEntries: [] }, { description: 'Análise', minutes: 30, type: 'Remoto', competence: '2026-10', performedAt: '2026-10-15', contractId: null }, { name: 'Técnico' }, contracts);
   assert.equal(pointed.timeEntries[0].contractId, null);
   assert.equal(pointed.timeEntries[0].consumesFranchise, false);
 });
@@ -101,6 +101,8 @@ test('valida duração, competência e elegibilidade da franquia', () => {
   const contracts = [{ id: 'CTR-0001', companyId: 'CLI-0001', status: 'Ativo', startsAt: '2026-01-01', endsAt: '2027-12-31' }];
   assert.throws(() => addTimeRecord(base, { description: 'Teste', minutes: 0, type: 'Remoto', competence: '2026-10' }, { name: 'Técnico' }, contracts), /duração/);
   assert.throws(() => addTimeRecord(base, { description: 'Teste', minutes: 30, type: 'Remoto', competence: '2026-13' }, { name: 'Técnico' }, contracts), /competência/);
+  assert.throws(() => addTimeRecord(base, { description: 'Teste', minutes: 30, type: 'Remoto', competence: '2026-09', performedAt: '2026-10-15' }, { name: 'Técnico' }, contracts), /mês da data do atendimento/);
+  assert.throws(() => addTimeRecord(base, { description: 'Teste', minutes: 30, type: 'Remoto', competence: '2026-10', performedAt: 'data-inválida' }, { name: 'Técnico' }, contracts), /data do atendimento/);
   const remote = addTimeRecord(base, { description: 'Suporte', minutes: 30, type: 'Remoto', competence: '2026-10', performedAt: '2026-10-15' }, { name: 'Técnico' }, contracts);
   assert.equal(remote.timeEntries[0].consumesFranchise, true);
 });

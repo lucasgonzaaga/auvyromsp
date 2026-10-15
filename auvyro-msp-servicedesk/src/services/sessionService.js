@@ -1,5 +1,5 @@
 const SESSION_KEY = 'auvyro-msp-session-user';
-const localUser = { id: 'local-user', name: 'Usuário local', initials: 'UL', authenticated: false };
+const localUser = Object.freeze({ id: 'local-user', name: 'Usuário local', initials: 'UL', authenticated: false, authorizationEnforced: false, source: 'local-demo' });
 
 export function getCurrentUser() {
   try {
@@ -11,7 +11,9 @@ export function getCurrentUser() {
       id: user.id,
       name: user.name,
       initials: user.initials || user.name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase(),
-      authenticated: true,
+      authenticated: false,
+      authorizationEnforced: false,
+      source: 'local-demo',
     };
   } catch { return localUser; }
 }

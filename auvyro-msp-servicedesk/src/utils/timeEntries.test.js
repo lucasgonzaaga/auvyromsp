@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { groupTimeConsumption, normalizeTimeEntry } from './timeEntries.js';
+import { getCompetence, groupTimeConsumption, normalizeTimeEntry } from './timeEntries.js';
+
+test('obtém a competência de datas civis sem deslocamento de fuso horário', () => {
+  assert.equal(getCompetence('2026-10-01'), '2026-10');
+});
 
 test('normaliza empresa, contrato, competência e faturabilidade do apontamento', () => {
   const entry = normalizeTimeEntry({ createdAt: '2026-10-15T10:00:00-03:00', minutes: 30, type: 'Remoto' }, { company: 'Empresa A', contractId: 'OFFICE-10' });

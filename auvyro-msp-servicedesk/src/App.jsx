@@ -19,8 +19,9 @@ import { getCurrentUser } from './services/sessionService.js';
 import { addContactRecord, addEquipmentRecord, createClientRecord, loadClients, saveClients } from './services/clientService.js';
 import { createContractRecord, loadContracts, saveContracts } from './services/contractService.js';
 
-export default function App() {
-  const [currentUser] = useState(getCurrentUser);
+export default function App({ currentUserOverride = null, onSignOut = null }) {
+  const [localUser] = useState(getCurrentUser);
+  const currentUser = currentUserOverride || localUser;
   const [clients, setClients] = useState(loadClients);
   const [contracts, setContracts] = useState(() => loadContracts(clients));
   const [tickets, setTickets] = useState(() => loadTickets(clients, contracts));
@@ -73,7 +74,7 @@ export default function App() {
   return <div className="shell">
     <Sidebar active={navActive} openTickets={metrics.open} mobileOpen={mobileMenu} onNavigate={navigate} onClose={() => setMobileMenu(false)} />
     <main className="main">
-      <Topbar active={view} currentUser={currentUser} notificationCount={recentNotifications.length} notificationsOpen={notificationsOpen} onMenu={() => setMobileMenu(true)} onQuickSearch={openQuickSearch} onNotifications={() => setNotificationsOpen((value) => !value)} />
+      <Topbar active={view} currentUser={currentUser} onSignOut={onSignOut} notificationCount={recentNotifications.length} notificationsOpen={notificationsOpen} onMenu={() => setMobileMenu(true)} onQuickSearch={openQuickSearch} onNotifications={() => setNotificationsOpen((value) => !value)} />
       {notificationsOpen && <aside className="notification-panel"><div><strong>Atividade recente</strong><button onClick={() => setNotificationsOpen(false)}>Fechar</button></div>{recentNotifications.map((item) => <button key={`${item.ticketId}-${item.id}`} onClick={() => openTicket(item.ticketId)}><span>{item.text}</span><small>{item.ticketId} · {formatDateTime(item.createdAt)}</small></button>)}</aside>}
       <div className="content">
         {view === 'dashboard' && <Dashboard tickets={activeTickets} metrics={metrics} onCreate={() => setNewTicketOpen(true)} onOpen={openTicket} onSeeAll={() => navigate('tickets')} />}
@@ -83,7 +84,7 @@ export default function App() {
         {view === 'time' && <TimeEntries tickets={tickets} onOpen={openTicket} />}
         {(view === 'team' || view === 'settings') && <InfoPage type={view} currentUser={currentUser} />}
         {view === 'details' && selected && <TicketDetails ticket={selected} contracts={contracts} currentUser={currentUser} onBack={() => navigate('tickets')} onSave={updateSelected} onComment={addComment} onTime={addTime} onArchive={archiveSelected} />}
-        <footer><span>Auvyro MSP · Central de serviços v0.2</span><span>Dados locais · última atualização agora</span></footer>
+        <footer><span>Auvyro MSP · Central de serviços v0.4</span><span>{currentUser.authenticated ? 'Sessão Supabase protegida por RLS' : 'Modo demonstração · dados locais'}</span></footer>
       </div>
     </main>
     {newTicketOpen && <TicketForm clients={clients} contracts={contracts} onClose={() => setNewTicketOpen(false)} onCreate={handleCreate} />}

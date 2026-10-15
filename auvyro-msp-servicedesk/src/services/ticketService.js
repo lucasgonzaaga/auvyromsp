@@ -1,4 +1,4 @@
-import { normalizeTimeEntry } from '../utils/timeEntries.js';
+import { getCompetence, normalizeTimeEntry } from '../utils/timeEntries.js';
 import { assertContractCompany } from './contractService.js';
 
 const STORAGE_KEY = 'auvyro-msp-tickets-v3';
@@ -132,6 +132,9 @@ export function addTimeRecord(ticket, entry, actor, contracts = []) {
   if (!['Remoto', 'Presencial'].includes(entry.type)) throw new RangeError('A modalidade do apontamento é inválida.');
   const contractId = Object.hasOwn(entry, 'contractId') ? entry.contractId || null : ticket.contractId || null;
   const performedAt = entry.performedAt || createdAt;
+  const performedCompetence = getCompetence(performedAt);
+  if (!performedCompetence) throw new RangeError('A data do atendimento é inválida.');
+  if (entry.competence !== performedCompetence) throw new RangeError('A competência deve corresponder ao mês da data do atendimento.');
   assertContractCompany(contractId, ticket.companyId, contracts, performedAt);
   const billable = entry.type === 'Presencial' ? entry.billable !== false : entry.billable === true;
   if (entry.type === 'Presencial' && !billable && !entry.billingExceptionReason?.trim()) throw new RangeError('Atendimento presencial não faturável exige justificativa.');
