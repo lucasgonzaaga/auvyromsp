@@ -20,7 +20,8 @@ export default function TicketDetails({ ticket, contracts, currentUser, onBack, 
   const dirty = status !== ticket.status || priority !== ticket.priority;
   const activity = useMemo(() => buildTicketActivity(ticket), [ticket]);
   const allowedStatuses = getAllowedStatuses(ticket.status);
-  const availableContracts = contracts.filter((contract) => contract.companyId === ticket.companyId && contract.status === 'Ativo');
+  const today = new Date().toISOString().slice(0, 10);
+  const availableContracts = contracts.filter((contract) => contract.companyId === ticket.companyId && contract.status === 'Ativo' && contract.startsAt <= today && contract.endsAt >= today);
 
   function submitComment(event) { event.preventDefault(); if (!comment.trim()) return; onComment(comment.trim()); setComment(''); }
   function submitTime(event) { event.preventDefault(); if (!time.description.trim() || Number(time.minutes) <= 0) return; onTime({ ...time, description: time.description.trim(), contractId: time.contractId || null }); setTime(emptyTime(ticket.contractId || '')); setTab('time'); }

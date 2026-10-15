@@ -22,7 +22,7 @@ import { createContractRecord, loadContracts, saveContracts } from './services/c
 export default function App() {
   const [currentUser] = useState(getCurrentUser);
   const [clients, setClients] = useState(loadClients);
-  const [contracts, setContracts] = useState(loadContracts);
+  const [contracts, setContracts] = useState(() => loadContracts(clients));
   const [tickets, setTickets] = useState(() => loadTickets(clients, contracts));
   const [view, setView] = useState('dashboard');
   const [selectedId, setSelectedId] = useState(null);

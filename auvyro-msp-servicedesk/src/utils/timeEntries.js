@@ -6,13 +6,16 @@ export function getCompetence(value) {
 }
 
 export function normalizeTimeEntry(entry, ticket = {}) {
+  const contractId = Object.hasOwn(entry, 'contractId') ? entry.contractId || null : ticket.contractId || null;
+  const billable = entry.billable === true;
   return {
     ...entry,
     companyId: entry.companyId || ticket.companyId || null,
     company: entry.company || ticket.company || '',
-    contractId: entry.contractId || ticket.contractId || null,
+    contractId,
     competence: entry.competence || getCompetence(entry.createdAt),
-    billable: entry.billable === true,
+    billable,
+    consumesFranchise: typeof entry.consumesFranchise === 'boolean' ? entry.consumesFranchise : Boolean(contractId && entry.type === 'Remoto' && !billable),
   };
 }
 
@@ -20,13 +23,16 @@ export function groupTimeConsumption(entries) {
   const groups = new Map();
   entries.forEach((entry) => {
     const normalized = normalizeTimeEntry(entry);
-    const key = [normalized.company, normalized.contractId || 'Sem contrato', normalized.competence || 'Sem competência', normalized.type || 'Não informada', normalized.billable ? 'Faturável' : 'Franquia'].join('|');
+    const classification = normalized.consumesFranchise ? 'Franquia' : normalized.billable ? 'Faturável' : 'Não consome';
+    const key = [normalized.company, normalized.contractId || 'Sem contrato', normalized.competence || 'Sem competência', normalized.type || 'Não informada', classification].join('|');
     const current = groups.get(key) || {
       company: normalized.company,
       contractId: normalized.contractId,
       competence: normalized.competence,
       type: normalized.type,
       billable: normalized.billable,
+      consumesFranchise: normalized.consumesFranchise,
+      classification,
       minutes: 0,
       entries: 0,
     };

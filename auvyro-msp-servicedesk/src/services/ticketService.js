@@ -44,7 +44,7 @@ export function normalizeTicket(ticket, clients = [], contracts = []) {
   const client = clients.find((item) => item.id === ticket.companyId) || clients.find((item) => item.name === ticket.company);
   const contact = client?.contacts.find((item) => item.id === ticket.requesterId) || client?.contacts.find((item) => item.name === ticket.requester);
   const companyId = client?.id || ticket.companyId || null;
-  const contract = contracts.find((item) => item.id === ticket.contractId && item.companyId === companyId) || contracts.find((item) => item.companyId === companyId && item.status === 'Ativo');
+  const contract = ticket.contractId ? contracts.find((item) => item.id === ticket.contractId && item.companyId === companyId) : null;
   const contractId = contracts.length ? contract?.id || null : ticket.contractId || null;
   return {
     ...ticket,
@@ -81,14 +81,14 @@ export function saveTickets(tickets) {
 }
 
 export function createTicket(tickets, form, clients, contracts) {
+  const createdAt = nowIso();
   const client = clients.find((item) => item.id === form.companyId);
   if (!client) throw new RangeError('Empresa não encontrada.');
   const contact = client.contacts.find((item) => item.id === form.requesterId && item.authorized);
   if (!contact) throw new RangeError('O solicitante não é um contato autorizado da empresa.');
-  assertContractCompany(form.contractId, client.id, contracts);
+  assertContractCompany(form.contractId, client.id, contracts, createdAt);
   const numericIds = tickets.map((ticket) => Number(ticket.id.replace('AUV-', ''))).filter(Number.isFinite);
   const id = `AUV-${String(Math.max(0, ...numericIds) + 1).padStart(4, '0')}`;
-  const createdAt = nowIso();
   return normalizeTicket({ ...form, company: client.name, requester: contact.name, id, status: 'Novo', assignee: '', createdAt, resolvedAt: null, closedAt: null, timeline: [{ id: uid('event'), type: 'created', text: `Chamado aberto por ${contact.name}`, createdAt }] }, clients, contracts);
 }
 
@@ -126,11 +126,17 @@ export function addCommentRecord(ticket, text, actor) {
 export function addTimeRecord(ticket, entry, actor, contracts = []) {
   const author = actorName(actor);
   const createdAt = nowIso();
-  const contractId = entry.contractId || ticket.contractId || null;
-  assertContractCompany(contractId, ticket.companyId, contracts);
+  const minutes = Number(entry.minutes);
+  if (!Number.isFinite(minutes) || minutes <= 0) throw new RangeError('A duração do apontamento deve ser positiva.');
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(entry.competence || '')) throw new RangeError('A competência do apontamento é inválida.');
+  if (!['Remoto', 'Presencial'].includes(entry.type)) throw new RangeError('A modalidade do apontamento é inválida.');
+  const contractId = Object.hasOwn(entry, 'contractId') ? entry.contractId || null : ticket.contractId || null;
+  const performedAt = entry.performedAt || createdAt;
+  assertContractCompany(contractId, ticket.companyId, contracts, performedAt);
   const billable = entry.type === 'Presencial' ? entry.billable !== false : entry.billable === true;
   if (entry.type === 'Presencial' && !billable && !entry.billingExceptionReason?.trim()) throw new RangeError('Atendimento presencial não faturável exige justificativa.');
-  const timeEntry = normalizeTimeEntry({ id: uid('time'), ...entry, contractId, billable, billingExceptionReason: entry.billingExceptionReason?.trim() || '', minutes: Number(entry.minutes), author, createdAt }, ticket);
+  const consumesFranchise = Boolean(contractId && entry.type === 'Remoto' && !billable);
+  const timeEntry = normalizeTimeEntry({ id: uid('time'), ...entry, contractId, performedAt, billable, consumesFranchise, billingExceptionReason: entry.billingExceptionReason?.trim() || '', minutes, author, createdAt }, ticket);
   return { ...ticket, timeEntries: [...ticket.timeEntries, timeEntry] };
 }
 

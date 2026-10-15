@@ -27,14 +27,16 @@ npm run build
 
 - Dashboard com fila aberta, chamados críticos, aguardando, resolvidos no dia e tempo técnico histórico.
 - Criação, busca e filtro de chamados.
-- Cadastro independente de empresas com IDs estáveis, documento fictício, contatos autorizados e equipamentos.
+- Cadastro independente de empresas com IDs estáveis, documento fictício, contatos autorizados e equipamentos. Contatos e equipamentos usam IDs internos globais; códigos `CON-*` e `EQP-*` são apenas de apresentação.
 - Contratos Office Care vinculados por ID à empresa, com status, vigência, limite fixo de oito computadores e franquia mensal de quatro horas.
 - Página de detalhes com prioridade, status, responsável e datas de abertura, resolução e encerramento.
 - Ações para assumir, iniciar, resolver, encerrar e reabrir chamados, respeitando transições de estado validadas pelo domínio.
 - Linha do tempo de eventos, comentários e apontamentos técnicos sem duplicação visual.
 - Chamados e apontamentos vinculados por IDs de empresa, contato e contrato, com bloqueio de vínculos entre empresas diferentes.
+- A escolha “Sem contrato” é preservada; o sistema nunca associa um Office Care automaticamente.
 - Apontamentos individuais com descrição, duração, modalidade, empresa, contrato, competência mensal e classificação como franquia ou faturável.
 - Atendimentos presenciais faturáveis por padrão; exceções não faturáveis exigem justificativa.
+- Apenas suporte remoto não faturável, vinculado a contrato ativo e vigente, consome a franquia. Cortesias presenciais justificadas não consomem horas.
 - Consolidação histórica de consumo por empresa, contrato, competência, modalidade e classificação faturável.
 - Cálculo mensal de consumo incluído, saldo de franquia, excedente e minutos faturáveis.
 - Listagens locais de clientes, equipe, configurações e apontamentos.
@@ -58,6 +60,7 @@ npm run build
 - Os contratos são registros locais fictícios; não há assinatura, reajuste, valores monetários, impostos, emissão de cobrança ou integração contábil.
 - A consolidação mensal calcula minutos incluídos, saldo e excedente, mas não transforma esses dados em cobrança financeira.
 - O limite de oito computadores é validado no contrato, mas não existe descoberta automática, inventário remoto ou confirmação física dos equipamentos.
+- Contratos suspensos, futuros ou vencidos não aceitam novos chamados ou apontamentos na respectiva data de atendimento.
 - A área de notificações apresenta apenas atividades locais recentes; não existem notificações push ou em tempo real.
 - As telas de clientes, equipe e configurações são visões locais básicas, sem cadastro administrativo completo.
 - A linha do tempo não é uma trilha de auditoria inviolável, pois todo o armazenamento é local.
