@@ -9,7 +9,7 @@ Pré-requisitos: Docker em execução, Supabase CLI, Node.js 22 e npm.
 ```powershell
 cd auvyro-msp-servicedesk
 npm ci
-supabase db start
+supabase start
 supabase test db
 npm test
 npm run build
