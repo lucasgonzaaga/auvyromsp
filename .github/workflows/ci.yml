@@ -1,0 +1,64 @@
+name: Auvyro MSP CI
+
+on:
+  push:
+    branches:
+      - prod
+  pull_request:
+    branches:
+      - prod
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Node tests and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: auvyro-msp-servicedesk
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: auvyro-msp-servicedesk/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit and schema tests
+        run: npm test
+
+      - name: Build React application
+        run: npm run build
+
+  database:
+    name: Supabase migrations and RLS tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: auvyro-msp-servicedesk
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Start local database and apply migrations
+        run: supabase db start
+
+      - name: Run pgTAP / RLS tests
+        run: supabase test db
