@@ -9,6 +9,10 @@ schemas = ["public", "graphql_public"]
 port = 54322
 major_version = 15
 
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
 [auth]
 enabled = true
 site_url = "http://127.0.0.1:5173"
