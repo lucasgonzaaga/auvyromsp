@@ -1,0 +1,4 @@
+export default function InfoPage({ type }) {
+  const content = type === 'team' ? { kicker: 'GESTÃO', title: 'Equipe', subtitle: 'Visão operacional dos responsáveis.', body: 'Alex Santos', detail: 'Administrador · 4 chamados atribuídos' } : { kicker: 'SISTEMA', title: 'Configurações', subtitle: 'Preferências deste ambiente local.', body: 'Armazenamento local', detail: 'Dados persistidos somente neste navegador' };
+  return <><section className="page-heading compact"><div><p className="overline">{content.kicker}</p><h1>{content.title}</h1><p className="subtitle">{content.subtitle}</p></div></section><section className="info-panel"><div><strong>{content.body}</strong><span>{content.detail}</span></div><p>Este módulo já possui uma tela própria e será expandido quando autenticação, permissões e banco de dados forem integrados.</p></section></>;
+}
