@@ -17,3 +17,4 @@
 .auth-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--bg,#f4f6f8)}
 .auth-card{width:min(420px,100%);display:grid;gap:18px;padding:32px;border:1px solid var(--border,#dfe3e8);border-radius:16px;background:#fff;box-shadow:0 18px 60px rgba(20,32,50,.1)}
 .auth-card h1,.auth-card p{margin:0}.auth-card label{display:grid;gap:7px;font-size:13px;font-weight:600}.auth-card input{width:100%}.auth-error{color:#b42318;font-size:13px}
+.operation-error{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;padding:12px 14px;border:1px solid #f1b5ad;border-radius:10px;background:#fff3f1;color:#8f251a;font-size:13px}.operation-error button{border:0;background:transparent;color:inherit;font-weight:700;cursor:pointer}

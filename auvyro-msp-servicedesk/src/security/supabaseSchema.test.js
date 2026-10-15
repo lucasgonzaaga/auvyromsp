@@ -13,11 +13,14 @@ test('migration habilita RLS em todas as tabelas de negócio', () => {
 test('migration impõe integridade de empresa, competência e auditoria', () => {
   assert.match(migration, /foreign key \(contract_id, company_id\)/i);
   assert.match(migration, /date_trunc\('month', performed_at\)::date = competence/i);
-  assert.match(migration, /revoke update, delete on public\.ticket_history/i);
+  assert.match(migration, /revoke insert, update, delete on public\.ticket_history/i);
 });
 
 test('migration diferencia administradores, técnicos e clientes', () => {
   assert.match(migration, /'admin', 'technician', 'client'/i);
   assert.match(migration, /current_company_id/i);
   assert.match(migration, /tickets_client_insert/i);
+  assert.match(migration, /tickets_client_update/i);
+  assert.match(migration, /audit_operational_change/i);
+  assert.match(migration, /revoke insert, update, delete on public\.ticket_history/i);
 });

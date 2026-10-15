@@ -2,7 +2,7 @@
 
 MVP administrativo local desenvolvido com React e Vite para demonstrar o fluxo de atendimento da Auvyro MSP.
 
-A infraestrutura Supabase está preparada para autenticação e persistência segura gradual. Sem variáveis de ambiente, a aplicação continua operando somente como demonstração local.
+A infraestrutura Supabase fornece autenticação, persistência operacional, auditoria e isolamento por empresa. Sem variáveis de ambiente, a aplicação opera somente como demonstração local.
 
 ## Requisitos
 
@@ -61,6 +61,9 @@ npm run test:db
 - Migration SQL versionada para empresas, perfis, contatos, equipamentos, contratos, chamados, comentários, histórico imutável e apontamentos.
 - Políticas RLS: equipe acessa a carteira; clientes enxergam somente sua empresa; alterações administrativas ficam restritas a administradores.
 - Integridade no PostgreSQL para vínculos entre empresas, limite de equipamentos, vigência contratual, competência e regras de faturamento.
+- Repositórios Supabase para empresas, contatos, equipamentos, contratos, chamados, comentários e apontamentos.
+- No modo autenticado, todas as consultas e alterações operacionais usam PostgreSQL; dados demonstrativos do `localStorage` não são lidos nem gravados.
+- Auditoria automática no banco para criação e alteração de chamados, comentários e apontamentos. Usuários autenticados não podem forjar, editar ou excluir o histórico.
 
 ## Regras do ciclo de vida
 
@@ -73,7 +76,7 @@ npm run test:db
 ## Limitações
 
 - Sem configuração Supabase, não há autenticação nem autorização: a identidade do `localStorage` serve apenas para apresentação e autoria demonstrativa.
-- Nesta etapa, o Supabase substitui a sessão local, mas os cadastros e chamados ainda usam `localStorage`. A migração desses serviços para repositórios PostgreSQL será incremental e não deve receber dados reais antes dos testes de integração, recuperação e auditoria.
+- O modo de demonstração e o modo Supabase são isolados. Não existe importação automática dos dados fictícios do navegador para o banco.
 - Os dados ficam somente no navegador atual, podem ser apagados e não são compartilhados entre dispositivos.
 - Não há cálculo de SLA, calendário de horário útil, anexos, envio de e-mail ou integrações externas.
 - Os contratos são registros locais fictícios; não há assinatura, reajuste, valores monetários, impostos, emissão de cobrança ou integração contábil.
@@ -83,6 +86,6 @@ npm run test:db
 - A área de notificações apresenta apenas atividades locais recentes; não existem notificações push ou em tempo real.
 - As telas de clientes, equipe e configurações são visões locais básicas, sem cadastro administrativo completo.
 - A linha do tempo não é uma trilha de auditoria inviolável, pois todo o armazenamento é local.
-- Este projeto é um MVP de demonstração e não deve receber dados reais de clientes nem ser usado como portal operacional de produção.
+- Antes de receber dados reais, ainda é necessário executar os testes pgTAP em uma instância Supabase local, definir backup/recuperação e validar o fluxo completo em ambiente de homologação.
 
 Projeto da divisão **Auvyro MSP**, pertencente à **Auvyro Tech**.
