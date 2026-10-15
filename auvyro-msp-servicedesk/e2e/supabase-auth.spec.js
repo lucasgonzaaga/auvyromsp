@@ -111,9 +111,9 @@ test.describe.serial('Supabase Auth e operações pela interface', () => {
     await expect(page.getByText(title, { exact: true })).toHaveCount(0);
     await page.getByRole('button', { name: 'Contratos', exact: true }).click();
     const contract = page.locator('.contract-card').filter({ hasText: 'Empresa Fictícia Aurora' });
-    await expect(contract).toContainText('04:30');
-    await expect(contract).toContainText('00:00');
-    await expect(contract).toContainText('01:30');
+    await expect(contract).toContainText('4h 30min');
+    await expect(contract).toContainText('0 min');
+    await expect(contract).toContainText('1h 30min');
     await page.getByRole('button', { name: 'Apontamentos', exact: true }).click();
     await expect(page.getByText('Atendimento remoto E2E', { exact: true })).toBeVisible();
     await expect(page.getByText('Excedente remoto E2E', { exact: true })).toBeVisible();
