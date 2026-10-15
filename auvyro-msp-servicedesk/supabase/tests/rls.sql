@@ -36,7 +36,7 @@ select lives_ok($$update public.tickets set title = 'Edited by client' where id 
 select throws_ok($$update public.tickets set status = 'triage' where id = 'ticket-client-a'$$, 'P0001', null, 'client cannot alter lifecycle');
 select lives_ok($$insert into public.ticket_comments(ticket_id,author_id,body) values ('ticket-a','01000000-0000-4000-8000-000000000003','Client comment')$$, 'client comments own ticket');
 select throws_ok($$insert into public.ticket_comments(ticket_id,author_id,body) values ('ticket-b','01000000-0000-4000-8000-000000000003','Cross company')$$, '42501', null, 'client cannot comment ticket B');
-select is((with deleted as (delete from public.tickets where id = 'ticket-a' returning *) select count(*) from deleted), 0::bigint, 'client cannot delete ticket');
+select results_eq($$delete from public.tickets where id = 'ticket-a' returning id$$, $$select null::text where false$$, 'client cannot delete ticket');
 
 -- Técnico: opera chamados, comentários e horas, sem alterar cadastros administrativos.
 select set_config('request.jwt.claim.sub', '01000000-0000-4000-8000-000000000002', true);
@@ -50,8 +50,8 @@ select is((with changed as (update public.profiles set display_name = 'Forbidden
 select lives_ok($$update public.tickets set status = 'triage', assignee_id = '01000000-0000-4000-8000-000000000002' where id = 'ticket-a'$$, 'technician advances and assumes ticket');
 select lives_ok($$insert into public.ticket_comments(ticket_id,author_id,body) values ('ticket-a','01000000-0000-4000-8000-000000000002','Technician comment')$$, 'technician comments ticket');
 select lives_ok($$insert into public.time_entries(id,ticket_id,company_id,contract_id,author_id,description,minutes,mode,performed_at,competence) values ('time-tech','ticket-a','company-a','contract-a','01000000-0000-4000-8000-000000000002','Remote support',30,'remote','2026-10-15','2026-10-01')$$, 'technician records valid time');
-select is((with deleted as (delete from public.tickets where id = 'ticket-a' returning *) select count(*) from deleted), 0::bigint, 'technician cannot delete ticket');
-select is((with deleted as (delete from public.time_entries where id = 'time-tech' returning *) select count(*) from deleted), 0::bigint, 'technician cannot delete time entry');
+select results_eq($$delete from public.tickets where id = 'ticket-a' returning id$$, $$select null::text where false$$, 'technician cannot delete ticket');
+select results_eq($$delete from public.time_entries where id = 'time-tech' returning id$$, $$select null::text where false$$, 'technician cannot delete time entry');
 
 -- Administrador: gerencia cadastros; auditoria continua protegida.
 select set_config('request.jwt.claim.sub', '01000000-0000-4000-8000-000000000001', true);
