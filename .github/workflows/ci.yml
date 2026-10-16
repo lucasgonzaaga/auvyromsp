@@ -39,6 +39,9 @@ jobs:
       - name: Run unit and schema tests
         run: npm test
 
+      - name: Run staging smoke unit tests
+        run: npm run test:staging
+
   database:
     name: Supabase, hosted build and browser E2E
     runs-on: ubuntu-latest
