@@ -15,7 +15,7 @@
     "test:smoke": "node scripts/cloud-smoke.mjs",
     "test:staging": "node --test src/security/stagingSmoke.test.js",
     "test:staging-smoke": "node --test scripts/smoke-cloud.test.mjs",
-    "smoke:staging": "node scripts/smoke-cloud.mjs"
+    "smoke:staging": "node scripts/smoke-staging.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.76.1",
