@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { smokeStaging } from '../scripts/smoke-staging.mjs';
+import { smokeStaging } from '../../scripts/smoke-staging.mjs';
 
 const cfg = { appUrl: 'https://staging.example.com', supabaseUrl: 'https://staging.supabase.co', publishableKey: 'sb_publishable_example' };
 const ok = (body, status = 200) => ({ status, ok: status >= 200 && status < 300, text: async () => body, json: async () => JSON.parse(body) });
