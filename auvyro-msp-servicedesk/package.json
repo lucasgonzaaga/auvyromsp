@@ -9,7 +9,7 @@
     "build:demo": "npm run build",
     "build:hosted": "node scripts/validate-hosted-env.mjs && vite build",
     "preview": "vite preview",
-    "test": "node --test src/repositories/supabaseRepository.test.js src/security/deploymentBuild.test.js src/security/remoteMode.test.js src/security/supabaseSchema.test.js src/services/clientService.test.js src/services/contractService.test.js src/services/sessionService.test.js src/services/ticketService.test.js src/utils/ticketMetrics.test.js src/utils/timeEntries.test.js scripts/smoke-cloud.test.mjs",
+    "test": "node --test src/repositories/supabaseRepository.test.js src/security/deploymentBuild.test.js src/security/remoteMode.test.js src/security/supabaseSchema.test.js src/services/clientService.test.js src/services/contractService.test.js src/services/sessionService.test.js src/services/ticketService.test.js src/utils/ticketMetrics.test.js src/utils/timeEntries.test.js src/security/stagingSmoke.test.js",
     "test:db": "supabase test db",
     "test:e2e": "playwright test",
     "smoke:cloud": "node scripts/smoke-cloud.mjs"
