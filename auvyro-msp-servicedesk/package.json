@@ -1,7 +1,7 @@
 {
   "name": "auvyro-msp-servicedesk",
   "private": true,
-  "version": "0.4.2",
+  "version": "0.4.3",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
@@ -9,9 +9,11 @@
     "build:demo": "npm run build",
     "build:hosted": "node scripts/validate-hosted-env.mjs && vite build",
     "preview": "vite preview",
-    "test": "node --test src/repositories/supabaseRepository.test.js src/security/deploymentBuild.test.js src/security/remoteMode.test.js src/security/supabaseSchema.test.js src/services/clientService.test.js src/services/contractService.test.js src/services/sessionService.test.js src/services/ticketService.test.js src/utils/ticketMetrics.test.js src/utils/timeEntries.test.js",
+    "test": "node --test src/repositories/supabaseRepository.test.js src/security/deploymentBuild.test.js src/security/remoteMode.test.js src/security/supabaseSchema.test.js src/services/clientService.test.js src/services/contractService.test.js src/services/sessionService.test.js src/services/ticketService.test.js src/utils/ticketMetrics.test.js src/utils/timeEntries.test.js src/security/stagingSmoke.test.js",
     "test:db": "supabase test db",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "smoke:staging": "node scripts/smoke-staging.mjs",
+    "test:staging": "node --test src/security/stagingSmoke.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.76.1",
