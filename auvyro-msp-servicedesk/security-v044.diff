@@ -1,0 +1,490 @@
+diff --git a/auvyro-msp-servicedesk/package-lock.json b/auvyro-msp-servicedesk/package-lock.json
+index bea5baf..4e6c77b 100644
+--- a/auvyro-msp-servicedesk/package-lock.json
++++ b/auvyro-msp-servicedesk/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "auvyro-msp-servicedesk",
+-  "version": "0.4.3",
++  "version": "0.4.4",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "auvyro-msp-servicedesk",
+-      "version": "0.4.3",
++      "version": "0.4.4",
+       "dependencies": {
+         "@supabase/supabase-js": "^2.76.1",
+         "lucide-react": "^0.468.0",
+@@ -16,6 +16,7 @@
+       "devDependencies": {
+         "@playwright/test": "^1.64.1",
+         "@vitejs/plugin-react": "^4.3.4",
++        "supabase": "^2.122.0",
+         "vite": "^6.0.5"
+       }
+     },
+@@ -301,6 +302,21 @@
+         "node": ">=6.9.0"
+       }
+     },
++    "node_modules/@ecies/ciphers": {
++      "version": "0.2.6",
++      "resolved": "https://registry.npmjs.org/@ecies/ciphers/-/ciphers-0.2.6.tgz",
++      "integrity": "sha512-patgsRPKGkhhoBjETV4XxD0En4ui5fbX0hzayqI3M8tvNMGUoUvmyYAIWwlxBc1KX5cturfqByYdj5bYGRpN9g==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "bun": ">=1",
++        "deno": ">=2.7.10",
++        "node": ">=16"
++      },
++      "peerDependencies": {
++        "@noble/ciphers": "^1.0.0"
++      }
++    },
+     "node_modules/@esbuild/aix-ppc64": {
+       "version": "0.25.12",
+       "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.25.12.tgz",
+@@ -810,6 +826,48 @@
+         "node": "^22.20 || ^24.12 || >=25"
+       }
+     },
++    "node_modules/@noble/ciphers": {
++      "version": "1.3.0",
++      "resolved": "https://registry.npmjs.org/@noble/ciphers/-/ciphers-1.3.0.tgz",
++      "integrity": "sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^14.21.3 || >=16"
++      },
++      "funding": {
++        "url": "https://paulmillr.com/funding/"
++      }
++    },
++    "node_modules/@noble/curves": {
++      "version": "1.9.7",
++      "resolved": "https://registry.npmjs.org/@noble/curves/-/curves-1.9.7.tgz",
++      "integrity": "sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@noble/hashes": "1.8.0"
++      },
++      "engines": {
++        "node": "^14.21.3 || >=16"
++      },
++      "funding": {
++        "url": "https://paulmillr.com/funding/"
++      }
++    },
++    "node_modules/@noble/hashes": {
++      "version": "1.8.0",
++      "resolved": "https://registry.npmjs.org/@noble/hashes/-/hashes-1.8.0.tgz",
++      "integrity": "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^14.21.3 || >=16"
++      },
++      "funding": {
++        "url": "https://paulmillr.com/funding/"
++      }
++    },
+     "node_modules/@playwright/test": {
+       "version": "1.64.1",
+       "resolved": "https://registry.npmjs.org/@playwright/test/-/test-1.64.1.tgz",
+@@ -1195,6 +1253,130 @@
+         "node": ">=22.0.0"
+       }
+     },
++    "node_modules/@supabase/cli-darwin-arm64": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-darwin-arm64/-/cli-darwin-arm64-2.122.0.tgz",
++      "integrity": "sha512-EsEGKIySkCXJZrywL4Q+wELyhD3NHVrpWXIVDtF3GdymTsjtV8FWPpzy2olzAOZlBrT4CmfNChFNtldnVKDtZg==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ]
++    },
++    "node_modules/@supabase/cli-darwin-x64": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-darwin-x64/-/cli-darwin-x64-2.122.0.tgz",
++      "integrity": "sha512-VPaUdcWeWl8AgiUT+f3CqRUqG/Ju/EouBjkMlPYyKVtENkllbs1ovqHezsPuDVcPI2S51PGIugpCinri7AzaOQ==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-arm64": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-arm64/-/cli-linux-arm64-2.122.0.tgz",
++      "integrity": "sha512-1YJ8HmI1SqmIdmoWVxWjm+GuRKz6oVTZGRTspQJSIKlKQ3MhTee06fjqu9VOYRIxWiMn0sHZpBFB/JAolm9LrQ==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "libc": [
++        "glibc"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-arm64-musl": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.122.0.tgz",
++      "integrity": "sha512-4iA2roUY35swqtHJrZtjcuSzohRtJp51IVg9rO+nB6ws2xiSDDXgug4mGTngL4JqIrBLaer+MeAwI2E9zY3k2g==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "libc": [
++        "musl"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-x64": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-x64/-/cli-linux-x64-2.122.0.tgz",
++      "integrity": "sha512-w1fuRWCry1gfMGGTUCLwBgNpLgVjvNRq6MfnkJa89hYpITWVIjYo/6VcfFFsbiwx1uPFAYXfHNuocF4m6jyPfA==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "libc": [
++        "glibc"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-x64-musl": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-x64-musl/-/cli-linux-x64-musl-2.122.0.tgz",
++      "integrity": "sha512-b+xfmbtwp1hPqjkxjwbhjmFFqqcW11bpRbey6fceLfQyUxIHTvrnV4s2jwFt3gbPLL2qbziULma4fVIlQy0GSw==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "libc": [
++        "musl"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-windows-arm64": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-windows-arm64/-/cli-windows-arm64-2.122.0.tgz",
++      "integrity": "sha512-QOLPgfYzlDz33qrTM9pw1DToX6DW5BMV/vz+BJEqoZbgPgRMCzRX602+D67+3Tanp9dJAfpTIaDW+NLFbxOdMA==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ]
++    },
++    "node_modules/@supabase/cli-windows-x64": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-windows-x64/-/cli-windows-x64-2.122.0.tgz",
++      "integrity": "sha512-ZqnYR0xUGHSNLYqoJIsQvM5RZCVDcoo3VdTXgHTz1jgdzs1yOvDGZQPtjgPYyxFvPREx9wlrw0/OkC4pfNgiqw==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ]
++    },
+     "node_modules/@supabase/functions-js": {
+       "version": "2.118.0",
+       "resolved": "https://registry.npmjs.org/@supabase/functions-js/-/functions-js-2.118.0.tgz",
+@@ -1441,6 +1623,24 @@
+         }
+       }
+     },
++    "node_modules/eciesjs": {
++      "version": "0.5.0",
++      "resolved": "https://registry.npmjs.org/eciesjs/-/eciesjs-0.5.0.tgz",
++      "integrity": "sha512-s0J9SEVYAEPg7J63GFMApLYzPH9VNIQIyC6s15JpnqVc0TqcKWdbgFlnAweEBRyMmko2dcs2sfC83Hj4J43tuA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@ecies/ciphers": "^0.2.6",
++        "@noble/ciphers": "^1.3.0",
++        "@noble/curves": "^1.9.7",
++        "@noble/hashes": "^1.8.0"
++      },
++      "engines": {
++        "bun": ">=1",
++        "deno": ">=2.7.10",
++        "node": ">=16"
++      }
++    },
+     "node_modules/electron-to-chromium": {
+       "version": "1.5.456",
+       "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.456.tgz",
+@@ -1552,6 +1752,16 @@
+         "node": ">=20.0.0"
+       }
+     },
++    "node_modules/jose": {
++      "version": "6.2.13",
++      "resolved": "https://registry.npmjs.org/jose/-/jose-6.2.13.tgz",
++      "integrity": "sha512-7TIg10ZE1x82YediN+lcrPNvGMKge9yFHQD+Qho/b8y2adfugU3AsvvHfxV0fzyFllT6l9xCjf4RWY9g/Z9PJQ==",
++      "dev": true,
++      "license": "MIT",
++      "funding": {
++        "url": "https://github.com/sponsors/panva"
++      }
++    },
+     "node_modules/js-tokens": {
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz",
+@@ -1839,6 +2049,30 @@
+         "node": ">=0.10.0"
+       }
+     },
++    "node_modules/supabase": {
++      "version": "2.122.0",
++      "resolved": "https://registry.npmjs.org/supabase/-/supabase-2.122.0.tgz",
++      "integrity": "sha512-6IQOuHnRFyUgQxi6j6WfxJ6R4sh6vgcyhKxapv/CCDqs3+O/UxMggPxGAPr2eTEt1MhAOpa6xftiNRHIsB7afQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "eciesjs": "^0.5.0",
++        "jose": "^6.2.10"
++      },
++      "bin": {
++        "supabase": "dist/supabase.js"
++      },
++      "optionalDependencies": {
++        "@supabase/cli-darwin-arm64": "2.122.0",
++        "@supabase/cli-darwin-x64": "2.122.0",
++        "@supabase/cli-linux-arm64": "2.122.0",
++        "@supabase/cli-linux-arm64-musl": "2.122.0",
++        "@supabase/cli-linux-x64": "2.122.0",
++        "@supabase/cli-linux-x64-musl": "2.122.0",
++        "@supabase/cli-windows-arm64": "2.122.0",
++        "@supabase/cli-windows-x64": "2.122.0"
++      }
++    },
+     "node_modules/tinyglobby": {
+       "version": "0.2.17",
+       "resolved": "https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz",
+diff --git a/auvyro-msp-servicedesk/package.json b/auvyro-msp-servicedesk/package.json
+index 4279a64..57fe85b 100644
+--- a/auvyro-msp-servicedesk/package.json
++++ b/auvyro-msp-servicedesk/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "auvyro-msp-servicedesk",
+   "private": true,
+-  "version": "0.4.3",
++  "version": "0.4.4",
+   "type": "module",
+   "scripts": {
+     "dev": "vite --host 127.0.0.1",
+@@ -24,6 +24,7 @@
+   "devDependencies": {
+     "@playwright/test": "^1.64.1",
+     "@vitejs/plugin-react": "^4.3.4",
++    "supabase": "^2.122.0",
+     "vite": "^6.0.5"
+   }
+ }
+diff --git a/supabase/migrations/20261027165136_harden_rls_helpers.sql b/supabase/migrations/20261027165136_harden_rls_helpers.sql
+new file mode 100644
+index 0000000..c2ee018
+--- /dev/null
++++ b/supabase/migrations/20261027165136_harden_rls_helpers.sql
+@@ -0,0 +1,76 @@
++-- v0.4.4: preserve function OIDs (policy/trigger dependencies) while moving
++-- privileged implementations outside the Data API's public/graphql_public schemas.
++begin;
++create schema if not exists private;
++revoke all on schema private from public, anon, authenticated;
++grant usage on schema private to authenticated;
++revoke create on schema public from public, anon, authenticated;
++alter default privileges in schema private revoke execute on functions from public;
++
++alter function public.current_role() set schema private;
++alter function private.current_role() set search_path = '';
++alter function public.current_company_id() set schema private;
++alter function private.current_company_id() set search_path = '';
++alter function public.is_staff() set schema private;
++-- No elevated privileges are necessary for composition of the profile lookup.
++create or replace function private.is_staff() returns boolean
++language sql stable security invoker set search_path = ''
++as $$ select coalesce(private.current_role() in ('admin','technician'), false) $$;
++
++-- Invoker wrappers retain the names used by enforce_ticket_rules and callers.
++-- Only the zero-argument private lookups bypass profiles RLS; they always filter
++-- by auth.uid() and active, never accept a caller-selected user/company.
++create function public.current_role() returns public.app_role
++language sql stable security invoker set search_path = ''
++as $$ select private.current_role() $$;
++create function public.current_company_id() returns text
++language sql stable security invoker set search_path = ''
++as $$ select private.current_company_id() $$;
++create function public.is_staff() returns boolean
++language sql stable security invoker set search_path = ''
++as $$ select private.is_staff() $$;
++
++revoke all on function private.current_role(), private.current_company_id(), private.is_staff(),
++  public.current_role(), public.current_company_id(), public.is_staff() from public, anon, authenticated;
++grant execute on function private.current_role(), private.current_company_id(), private.is_staff(),
++  public.current_role(), public.current_company_id(), public.is_staff() to authenticated;
++
++-- Existing audit triggers retain their dependency on this function's OID.
++alter function public.audit_operational_change() set schema private;
++alter function private.audit_operational_change() set search_path = '';
++revoke all on function private.audit_operational_change() from public, anon, authenticated;
++
++-- Trigger execution does not require a runtime EXECUTE grant for the caller.
++alter function public.enforce_ticket_rules() set search_path = '';
++alter function public.validate_ticket_relations() set search_path = '';
++alter function public.validate_time_entry_contract() set search_path = '';
++alter function public.validate_contract_equipment_limit() set search_path = '';
++alter function public.create_office_care_contract(text, date, date, public.contract_status, text[]) set search_path = '';
++
++-- Policies no longer run authenticated-only helper functions for anon.
++-- Keep anon SELECT compatibility: all business tables return zero rows.
++do $$
++declare p record; t text;
++begin
++  for p in select tablename, policyname from pg_catalog.pg_policies
++    where schemaname = 'public' and tablename = any(array[
++      'companies','profiles','contacts','equipment','contracts','contract_equipment',
++      'tickets','ticket_comments','ticket_history','time_entries'])
++  loop
++    execute format('alter policy %I on public.%I to authenticated', p.policyname, p.tablename);
++  end loop;
++  foreach t in array array['companies','profiles','contacts','equipment','contracts','contract_equipment',
++    'tickets','ticket_comments','ticket_history','time_entries']
++  loop
++    execute format('revoke all on table public.%I from public, anon, authenticated', t);
++    execute format('grant select on table public.%I to anon, authenticated', t);
++  end loop;
++end $$;
++grant insert, update, delete on public.companies, public.profiles, public.contacts,
++  public.equipment, public.contracts, public.contract_equipment to authenticated;
++-- Retain DELETE grants so existing callers receive zero rows from RLS, as before.
++grant insert, update, delete on public.tickets, public.time_entries to authenticated;
++grant insert on public.ticket_comments to authenticated;
++revoke all on sequence public.company_code_seq, public.contact_code_seq, public.equipment_code_seq,
++  public.contract_code_seq, public.ticket_code_seq from public, anon;
++commit;
+diff --git a/supabase/tests/harden_rls_helpers.sql b/supabase/tests/harden_rls_helpers.sql
+new file mode 100644
+index 0000000..0e0354f
+--- /dev/null
++++ b/supabase/tests/harden_rls_helpers.sql
+@@ -0,0 +1,79 @@
++begin;
++select no_plan();
++
++select is((select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
++  where n.nspname='public' and p.prosecdef), 0::bigint, 'no exposed SECURITY DEFINER functions');
++select ok(not has_schema_privilege('anon','private','USAGE'), 'anon cannot use private schema');
++select ok(not has_schema_privilege('authenticated','private','CREATE'), 'users cannot replace private functions');
++select ok(not has_schema_privilege('authenticated','public','CREATE'), 'users cannot inject public objects');
++select is((select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
++  where n.nspname='private' and p.prosecdef and not coalesce(p.proconfig @> array['search_path=""'],false)),
++  0::bigint, 'every private definer has empty search_path');
++select is((select count(*) from pg_policies where schemaname='public' and roles <> array['authenticated']::name[]),
++  0::bigint, 'business policies restricted to authenticated');
++select ok(not has_function_privilege('authenticated','private.audit_operational_change()','EXECUTE'), 'audit cannot be called by users');
++select ok(not has_function_privilege('anon','private.audit_operational_change()','EXECUTE'), 'audit cannot be called by anon');
++select ok(not has_function_privilege('authenticated','public.enforce_ticket_rules()','EXECUTE'), 'ticket trigger is not callable');
++select ok(not has_function_privilege('authenticated','public.validate_ticket_relations()','EXECUTE'), 'relation trigger is not callable');
++select ok(not has_function_privilege('authenticated','public.validate_time_entry_contract()','EXECUTE'), 'time trigger is not callable');
++select ok(not has_function_privilege('authenticated','public.validate_contract_equipment_limit()','EXECUTE'), 'equipment trigger is not callable');
++select ok(not has_function_privilege('anon','public.create_office_care_contract(text,date,date,public.contract_status,text[])','EXECUTE'), 'anon cannot call contract RPC');
++select ok(not has_table_privilege(r,t,'TRUNCATE') and not has_table_privilege(r,t,'TRIGGER'), r || ' cannot truncate or attach triggers: ' || t)
++from unnest(array['anon','authenticated']) r cross join unnest(array[
++ 'public.companies','public.profiles','public.contacts','public.equipment','public.contracts',
++ 'public.contract_equipment','public.tickets','public.ticket_comments','public.ticket_history','public.time_entries']) t;
++
++set local role anon;
++select set_config('request.jwt.claim.sub','01000000-0000-4000-8000-000000000001',true);
++select throws_ok('select public.current_role()', '42501', null, 'anon cannot invoke role lookup even with forged sub');
++select throws_ok('select public.current_company_id()', '42501', null, 'anon cannot invoke company lookup');
++select throws_ok('select public.is_staff()', '42501', null, 'anon cannot invoke staff lookup');
++select throws_ok('select private.current_role()', '42501', null, 'anon cannot invoke private lookup');
++select is((select count(*) from public.companies),0::bigint,'anon with forged admin sub sees no companies');
++select throws_ok('truncate public.ticket_history', '42501', null, 'anon cannot erase audit with TRUNCATE');
++
++set local role authenticated;
++select set_config('request.jwt.claim.sub','',true);
++select is(public.current_role(),null::public.app_role,'missing subject has no role');
++select is(public.current_company_id(),null::text,'missing subject has no company');
++select is(public.is_staff(),false,'missing subject is not staff');
++select set_config('request.jwt.claim.sub','01000000-0000-4000-8000-000000000099',true);
++select is(public.current_role(),null::public.app_role,'unknown subject has no role');
++select is((select count(*) from public.tickets),0::bigint,'unknown subject has no tickets');
++
++select set_config('request.jwt.claim.sub','01000000-0000-4000-8000-000000000003',true);
++select is(public.current_role(),'client'::public.app_role,'client role resolves without profiles recursion');
++select is(private.current_company_id(),'company-a','private lookup returns only own company');
++select is(public.is_staff(),false,'client is not staff');
++select is((select count(*) from public.profiles),1::bigint,'client sees only own profile');
++select results_eq($$update public.profiles set role='admin' where id=auth.uid() returning id$$,
++  $$select null::uuid where false$$,'client cannot elevate own role');
++select is((select count(*) from public.ticket_history where ticket_id='ticket-b'),0::bigint,'client cannot read other company audit');
++select set_config('request.jwt.claim.sub','01000000-0000-4000-8000-000000000004',true);
++select is(public.current_company_id(),'company-b','second client resolves company B');
++select is((select count(*) from public.tickets where company_id='company-a'),0::bigint,'second client cannot read company A');
++
++select set_config('request.jwt.claim.sub','01000000-0000-4000-8000-000000000002',true);
++select is(public.current_role(),'technician'::public.app_role,'technician role preserved');
++select is(public.is_staff(),true,'technician is staff');
++select is((select count(*) from public.profiles),4::bigint,'technician reads profiles without recursion');
++select throws_ok('truncate public.ticket_history','42501',null,'technician cannot erase audit');
++select set_config('request.jwt.claim.sub','01000000-0000-4000-8000-000000000001',true);
++select is(public.current_role(),'admin'::public.app_role,'admin role preserved');
++select is(public.is_staff(),true,'admin is staff');
++select is((select count(*) from public.profiles),4::bigint,'admin reads profiles without recursion');
++select throws_ok('select private.audit_operational_change()','42501',null,'admin cannot directly execute privileged audit');
++select throws_ok('truncate public.companies cascade','42501',null,'admin app role cannot bypass RLS with TRUNCATE');
++select lives_ok($$insert into public.ticket_comments(id,ticket_id,author_id,body) values ('hardening-comment','ticket-a',auth.uid(),'Audit trigger still works')$$,'private audit trigger executes without caller EXECUTE');
++select is((select count(*) from public.ticket_history where payload->>'comment_id'='hardening-comment'),1::bigint,'private trigger records audit');
++
++set local role postgres;
++update public.profiles set active=false where id='01000000-0000-4000-8000-000000000003';
++set local role authenticated;
++select set_config('request.jwt.claim.sub','01000000-0000-4000-8000-000000000003',true);
++select is(public.current_role(),null::public.app_role,'inactive client has no role');
++select is(public.current_company_id(),null::text,'inactive client has no company');
++select is(public.is_staff(),false,'inactive client is not staff');
++select is((select count(*) from public.tickets),0::bigint,'inactive client sees no tickets');
++select * from finish();
++rollback;
